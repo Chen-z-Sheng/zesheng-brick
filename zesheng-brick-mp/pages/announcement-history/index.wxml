@@ -1,0 +1,52 @@
+<view class="page-container">
+    <view class="page-header">
+        <text class="page-title">公告历史</text>
+    </view>
+
+    <!-- 加载中 -->
+    <view wx:if="{{loading}}" class="loading-wrap">
+        <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- 公告列表 -->
+    <view wx:elif="{{announcementList.length > 0}}" class="announcement-list">
+        <view
+            wx:for="{{announcementList}}"
+            wx:key="id"
+            class="announcement-card"
+            data-index="{{index}}"
+            bindtap="openDetail"
+        >
+            <view class="announcement-header">
+                <text class="announcement-title">{{item.title}}</text>
+                <text wx:if="{{item.status === 1}}" class="announcement-status">当前</text>
+            </view>
+            <text class="announcement-time">发布时间：{{item.createdAtText}}</text>
+            <text class="announcement-preview">{{item.previewText || '点击查看公告详情'}}</text>
+        </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:else class="empty-wrap">
+        <text class="empty-title">暂无公告</text>
+        <text class="empty-desc">稍后再来看看吧</text>
+    </view>
+
+    <!-- 详情弹窗 -->
+    <view wx:if="{{detailVisible && activeAnnouncement}}" class="detail-mask" bindtap="closeDetail">
+        <view class="detail-dialog" catchtap="noop">
+            <view class="detail-header">
+                <text class="detail-title">{{activeAnnouncement.title}}</text>
+                <text wx:if="{{activeAnnouncement.status === 1}}" class="announcement-status">当前</text>
+            </view>
+            <view class="detail-close" bindtap="closeDetail">×</view>
+            <text class="detail-time">发布时间：{{activeAnnouncement.createdAtText}}</text>
+            <scroll-view scroll-y="true" class="detail-body">
+                <view class="detail-content-wrap">
+                    <rich-text class="detail-content" nodes="{{activeAnnouncement.content}}"></rich-text>
+                </view>
+            </scroll-view>
+            <button class="detail-button" bindtap="closeDetail">我知道了</button>
+        </view>
+    </view>
+</view>

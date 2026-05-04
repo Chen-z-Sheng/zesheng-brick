@@ -1,0 +1,6 @@
+# 服务器本机填写后的环境脚本（勿提交）
+scripts/zesheng-server-env.sh
+
+# 本地开发含第三方密钥的 profile（勿提交）；协作者请复制 application-dev.example.yml
+zesheng-brick-parent/zesheng-admin-service/src/main/resources/application-dev.yml
+zesheng-brick-parent/zesheng-client-service/src/main/resources/application-dev.yml

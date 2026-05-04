@@ -1,0 +1,96 @@
+<view class="login-container">
+  <view class="login-header">
+    <image class="logo" src="/images/icon/home.png" mode="aspectFit" />
+    <text class="app-name">泽晟搬砖助手</text>
+    <text class="slogan">高效撸货 · 行情报单</text>
+  </view>
+
+  <view class="login-content">
+    <text class="login-title">欢迎登录</text>
+    <text class="login-desc">登录后享受更多服务</text>
+
+    <view class="login-buttons">
+      <block wx:if="{{identityMode === 'donut'}}">
+        <view class="mask-line">本机号码：{{phoneMask}}</view>
+        <view class="carrier-doc-row">
+          <text class="carrier-link" catchtap="openCarrierDoc" data-which="cm">《中国移动认证条款》</text>
+          <text class="carrier-split">·</text>
+          <text class="carrier-link" catchtap="openCarrierDoc" data-which="cu">《联通统一认证条款》</text>
+          <text class="carrier-split">·</text>
+          <text class="carrier-link" catchtap="openCarrierDoc" data-which="ct">《天翼账号隐私协议》</text>
+        </view>
+        <checkbox-group class="agree-block" bindchange="onAgreeOperatorChange">
+          <label class="agree-row">
+            <checkbox value="agree" />
+            <text class="agree-text">已阅读并同意上述运营商条款，授权获取本机号码用于登录</text>
+          </label>
+        </checkbox-group>
+        <button
+          class="wechat-login-btn"
+          open-type="phoneOneClickLogin"
+          bindphoneoneclicklogin="onPhoneOneClick"
+          disabled="{{loading || !agreeOperator || !nativeOneClickReady}}"
+          loading="{{loading}}"
+        >
+          <text class="wechat-login-text">本机号码一键登录</text>
+        </button>
+
+        <view class="login-divider">
+          <view class="login-divider-line" />
+          <text class="login-divider-text">手机号验证码登录</text>
+          <view class="login-divider-line" />
+        </view>
+
+        <input
+          class="sms-input"
+          type="number"
+          maxlength="11"
+          placeholder="请输入手机号"
+          value="{{smsPhone}}"
+          bindinput="onSmsPhoneInput"
+        />
+        <button
+          class="sms-send-btn"
+          open-type="sendPhoneSms"
+          sms-type="{{0}}"
+          phoneNumber="{{smsPhone}}"
+          bindsendphonesms="onSendSmsDone"
+          disabled="{{sendSmsDisabled || loading}}"
+        >
+          发送验证码
+        </button>
+        <input
+          class="sms-input sms-input-code"
+          type="number"
+          maxlength="6"
+          placeholder="请输入6位验证码"
+          value="{{smsCode}}"
+          bindinput="onSmsCodeInput"
+        />
+        <button class="sms-submit-btn" bindtap="submitSmsLogin" disabled="{{loading}}">
+          验证码登录
+        </button>
+      </block>
+
+      <block wx:else>
+        <button
+          class="wechat-login-btn"
+          open-type="getPhoneNumber"
+          bindgetphonenumber="onPhoneQuickLogin"
+          disabled="{{loading}}"
+          loading="{{loading}}"
+        >
+          <text class="wechat-login-text">微信授权手机号登录</text>
+        </button>
+        <text class="legacy-tip">当前环境不支持多端身份能力时，请使用此项或升级微信后重试</text>
+      </block>
+    </view>
+  </view>
+
+  <view class="login-footer">
+    <text class="footer-text">登录即表示同意</text>
+    <text class="footer-link">《用户协议》</text>
+    <text class="footer-text">和</text>
+    <text class="footer-link">《隐私政策》</text>
+  </view>
+</view>

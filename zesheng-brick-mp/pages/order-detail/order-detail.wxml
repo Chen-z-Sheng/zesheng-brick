@@ -1,0 +1,167 @@
+<view class="page">
+    <view class="load-wrap" wx:if="{{loading}}">
+        <text class="load-txt">加载中...</text>
+    </view>
+    <view class="error-wrap" wx:elif="{{error}}">
+        <text class="error-txt">{{error}}</text>
+    </view>
+    <scroll-view wx:else class="scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <!-- 固结报单 -->
+        <block wx:if="{{type === 'form' && form}}">
+            <!-- 状态头部 -->
+            <view class="block head">
+                <view class="tag tag-form">固结报单</view>
+                <text class="status">{{statusText}}</text>
+            </view>
+            <!-- 报单信息 -->
+            <view class="block">
+                <view class="block-title">报单信息</view>
+                <view class="block-divider"></view>
+                <view class="block-content">
+                    <view class="row"><text class="label">下单方案</text><text class="value">{{form.schemeName || '—'}}</text></view>
+                    <view class="row"><text class="label">数量</text><text class="value">{{form.quantity != null ? form.quantity : '—'}}</text></view>
+                    <view class="row" wx:for="{{dataJsonLabels}}" wx:key="label">
+                        <text class="label">{{item.label}}</text>
+                        <text class="value">{{item.value}}</text>
+                    </view>
+                    <view class="row" wx:if="{{form.dataJson && form.dataJson.imageUrls && form.dataJson.imageUrls.length}}">
+                        <text class="label">上传图片</text>
+                        <view class="imgs">
+                            <image
+                                wx:for="{{form.dataJson.imageUrls}}"
+                                wx:key="*this"
+                                class="thumb"
+                                src="{{item}}"
+                                mode="aspectFill"
+                                show-menu-by-longpress="{{true}}"
+                            />
+                        </view>
+                    </view>
+                    <view class="admin-note-block" wx:if="{{form.adminInternalNote != null && form.adminInternalNote !== ''}}">
+                        <text class="admin-note-block__label">管理员备注</text>
+                        <text class="admin-note-block__value">{{form.adminInternalNote}}</text>
+                    </view>
+                </view>
+            </view>
+        </block>
+
+        <!-- 行情报单 -->
+        <block wx:if="{{type === 'sell' && sell}}">
+            <view class="block head">
+                <view class="tag tag-sell">行情报单</view>
+                <text class="status">{{statusText}}</text>
+            </view>
+            <view class="block">
+                <view class="block-title">报单信息</view>
+                <view class="block-divider"></view>
+                <view class="block-content">
+                    <view class="row"><text class="label">寄件人</text><text class="value">{{sell.senderName || '—'}}</text></view>
+                    <view class="row"><text class="label">寄件人电话</text><text class="value">{{sell.senderPhone || '—'}}</text></view>
+                    <view class="row"><text class="label">物流公司</text><text class="value">{{sell.logisticsCompany || '—'}}</text></view>
+                    <view class="row"><text class="label">快递单号</text><text class="value">{{sell.logisticsNo || '—'}}</text></view>
+                    <view class="row"><text class="label">是否寄存</text><text class="value">{{depositText}}</text></view>
+                    <view class="row" wx:if="{{sell.remark}}"><text class="label">备注</text><text class="value">{{sell.remark}}</text></view>
+                    <view class="admin-note-block" wx:if="{{sell.adminInternalNote != null && sell.adminInternalNote !== ''}}">
+                        <text class="admin-note-block__label">管理员备注</text>
+                        <text class="admin-note-block__value">{{sell.adminInternalNote}}</text>
+                    </view>
+                </view>
+            </view>
+            <!-- 商品明细 -->
+            <view class="block" wx:if="{{items && items.length}}">
+                <view class="block-title">商品明细</view>
+                <view class="block-divider"></view>
+                <view class="block-content">
+                    <view class="item" wx:for="{{items}}" wx:key="index">
+                        <text class="item-name">{{item.name}}</text>
+                        <text class="item-qty">× {{item.quantity}}</text>
+                    </view>
+                </view>
+            </view>
+        </block>
+
+        <!-- 物流轨迹 -->
+        <view class="block" wx:if="{{enableLogisticsTrace && ((type === 'form' && form) || (type === 'sell' && sell))}}">
+            <view class="block-content">
+                <view class="logistics-panel__head">
+                    <text class="logistics-panel__title">物流轨迹</text>
+                    <view
+                        class="logistics-panel__toggle"
+                        wx:if="{{logisticsTrace && logisticsTrace.success && logisticsTrace.traces && logisticsTrace.traces.length}}"
+                        catchtap="toggleLogisticsExpand"
+                    >
+                        <text class="logistics-panel__toggle-text">{{logisticsExpanded ? '收起' : '展开全部'}}</text>
+                        <text class="logistics-panel__toggle-arrow">{{logisticsExpanded ? '▲' : '▼'}}</text>
+                    </view>
+                </view>
+
+                <text wx:if="{{logisticsLoading}}" class="logistics-placeholder">正在查询物流信息…</text>
+
+                <block wx:elif="{{logisticsTrace}}">
+                    <view wx:if="{{logisticsTrace.success}}" class="logistics-card">
+                        <view
+                            class="logistics-latest {{ (!logisticsExpanded && logisticsTrace.traces && logisticsTrace.traces.length) ? 'logistics-latest--clamp' : '' }}"
+                            wx:if="{{ !(logisticsExpanded && logisticsTrace.traces && logisticsTrace.traces.length > 1) }}"
+                        >
+                            <text class="logistics-latest__text">{{logisticsTrace.lastTime ? logisticsTrace.lastTime + ' ' : ''}}{{logisticsTrace.lastInfo || logisticsTrace.stateText || '—'}}</text>
+                        </view>
+                        <text
+                            class="logistics-panel__hint"
+                            wx:if="{{!logisticsExpanded && logisticsTrace.traces && logisticsTrace.traces.length > 1}}"
+                        >共 {{logisticsTrace.traces.length}} 条记录，点击「展开全部」查看</text>
+                        <view class="timeline" wx:if="{{logisticsExpanded && logisticsTrace.traces && logisticsTrace.traces.length > 1}}">
+                            <view class="timeline-item" wx:for="{{logisticsTrace.traces}}" wx:key="index">
+                                <view class="timeline-axis">
+                                    <view class="timeline-dot"></view>
+                                    <view class="timeline-line"></view>
+                                </view>
+                                <view class="timeline-content">
+                                    <text class="timeline-time">{{item.time}}</text>
+                                    <text class="timeline-ctx">{{item.context}}</text>
+                                </view>
+                            </view>
+                        </view>
+                    </view>
+                    <text wx:else class="logistics-err">{{logisticsTrace.errorMessage}}</text>
+                </block>
+            </view>
+        </view>
+
+        <!-- 结算凭证 -->
+        <view class="block" wx:if="{{proofUrls && proofUrls.length}}">
+            <view class="block-title">结算凭证</view>
+            <view class="block-divider"></view>
+            <view class="block-content">
+                <view class="proof-list">
+                    <image
+                        wx:for="{{proofUrls}}"
+                        wx:key="*this"
+                        class="proof-img"
+                        src="{{item}}"
+                        mode="widthFix"
+                        show-menu-by-longpress="{{true}}"
+                    />
+                </view>
+            </view>
+        </view>
+
+        <!-- 结算信息（固结） -->
+        <view class="block" wx:if="{{type === 'form' && form && (form.expectedAmountStr != null || form.settledAmount != null || form.settledAt)}}">
+            <view class="block-title">结算信息</view>
+            <view class="block-divider"></view>
+            <view class="block-content">
+                <view class="row" wx:if="{{form.expectedAmountStr}}"><text class="label">应结金额</text><text class="value">¥{{form.expectedAmountStr}}</text></view>
+                <view class="row" wx:if="{{form.settledAmount != null}}"><text class="label">实际结算</text><text class="value">¥{{form.settledAmount}}</text></view>
+                <view class="row" wx:if="{{form.settledAtText}}"><text class="label">结算时间</text><text class="value">{{form.settledAtText}}</text></view>
+            </view>
+        </view>
+
+        <!-- 提交时间 -->
+        <view class="block footer">
+            <view class="block-content">
+                <view class="row"><text class="label">提交时间</text><text class="value">{{createdAt}}</text></view>
+                <view class="row"><text class="label">最后更新</text><text class="value">{{updatedAt}}</text></view>
+            </view>
+        </view>
+    </scroll-view>
+</view>

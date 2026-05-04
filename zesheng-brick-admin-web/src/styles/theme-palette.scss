@@ -1,0 +1,21 @@
+/**
+ * 主题色：通过 body 上的 class 切换 Element Plus 主色等 CSS 变量。
+ * 绿荫/荣耀为内置调色；完整换肤 SCSS 可放入 themes/ 目录（见 themes/default.scss 说明）。
+ */
+@charset "utf-8";
+
+:root,
+body.vue-admin-better-theme-default {
+  --el-color-primary: #409eff;
+  --vab-menu-active-bg: #409eff;
+}
+
+body.vue-admin-better-theme-green {
+  --el-color-primary: #41b882;
+  --vab-menu-active-bg: #41b882;
+}
+
+body.vue-admin-better-theme-glory {
+  --el-color-primary: #9b59b6;
+  --vab-menu-active-bg: #9b59b6;
+}

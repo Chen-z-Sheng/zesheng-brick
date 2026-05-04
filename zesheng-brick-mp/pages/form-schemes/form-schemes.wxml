@@ -1,0 +1,263 @@
+<view class="page" bindtap="onPageTapDismissDropdowns">
+  <!-- 未登录占位 -->
+  <view class="need-login-wrap" wx:if="{{needLogin && planList.length === 0}}">
+    <text class="need-login-text">登录后可填写</text>
+  </view>
+
+  <view class="form" wx:elif="{{!needLogin || planList.length > 0}}">
+    <!-- 下单方案：方案列表为卡片内绝对定位浮层，样式同物流公司联想（无全屏遮罩） -->
+    <view class="cell-group plan-scheme-group">
+      <view class="cell-group-title">下单方案 <text class="required">*</text></view>
+      <block wx:if="{{!schemeName}}">
+        <view class="plan-scheme-input-wrap" mark:dropdownArea="1">
+          <view class="cell">
+            <view class="cell-bd">
+              <input
+                class="cell-input"
+                placeholder="请搜索/选择方案"
+                placeholder-class="input-placeholder"
+                value="{{planSearchText}}"
+                bindfocus="focusPlanInput"
+                bindblur="blurPlanInput"
+                bindinput="onPlanSearchInput"
+              />
+            </view>
+          </view>
+          <scroll-view
+            wx:if="{{showPlanDropdown}}"
+            class="suggest-list plan-dropdown-scroll"
+            style="height: {{planDropdownHeightRpx}}rpx;"
+            scroll-y="true"
+            bindtouchstart="onPlanDropdownTouch"
+          >
+            <block wx:if="{{isLoadingPlans}}">
+              <view class="suggest-list-placeholder">加载中...</view>
+            </block>
+            <block wx:elif="{{filteredPlanList.length === 0}}">
+              <view class="suggest-list-placeholder">暂无方案</view>
+            </block>
+            <block wx:else>
+              <view
+                class="suggest-item"
+                wx:for="{{filteredPlanList}}"
+                wx:key="id"
+                data-index="{{index}}"
+                data-plan-id="{{item.id}}"
+                bindtouchstart="onDropdownOptionTouchStart"
+                bindtouchmove="onDropdownOptionTouchMove"
+                bindtouchend="onPlanOptionTouchEnd"
+              >{{item.name}}</view>
+            </block>
+          </scroll-view>
+        </view>
+      </block>
+      <view class="cell-scheme-selected" wx:if="{{schemeName}}">
+        <text class="cell-scheme-name">{{schemeName}}</text>
+        <text class="btn-link btn-reset" bindtap="clearPlanSelection">重选</text>
+      </view>
+    </view>
+
+    <!-- 加赠 -->
+    <view class="cell-group">
+      <view class="cell-group-title">加赠</view>
+      <view class="cell cell-input-wrap">
+        <input
+          class="cell-input"
+          placeholder="如果有加赠,请填写加赠名称"
+          placeholder-class="input-placeholder"
+          value="{{giftDesc}}"
+          bindinput="onGiftDescInput"
+        />
+      </view>
+    </view>
+
+    <!-- 下单数量 -->
+    <view class="cell-group">
+      <view class="cell-group-title">下单数量 <text class="required">*</text></view>
+      <view class="cell quantity-cell">
+        <view class="stepper">
+          <view class="stepper-minus" bindtap="decQuantity">－</view>
+          <input
+            class="stepper-num"
+            type="number"
+            value="{{quantity}}"
+            bindinput="onQuantityInput"
+          />
+          <view class="stepper-plus" bindtap="incQuantity">＋</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 快递单号 -->
+    <view class="cell-group">
+      <view class="cell-group-title">快递单号 <text class="required">*</text></view>
+      <view class="cell cell-input-wrap">
+        <input
+          class="cell-input"
+          placeholder="请填写快递单号"
+          placeholder-class="input-placeholder"
+          value="{{expressNo}}"
+          bindinput="onExpressNoInput"
+        />
+      </view>
+    </view>
+
+    <view class="cell-group">
+      <view class="cell-group-title-row">
+        <text class="cell-group-title-text">收件人信息</text>
+        <view class="title-help-btn" bindtap="onLogisticsHelpTap" catchtap="onLogisticsHelpTap">?</view>
+      </view>
+      <view class="cell cell-picker" bindtap="onSenderCellTap">
+        <text class="{{selectedSenderIndex > 0 ? 'picker-value' : 'picker-placeholder'}}">{{selectedSenderDisplay}}</text>
+        <text class="picker-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="sender-modal-mask" wx:if="{{showSenderListPopup}}" catchtap="closeSenderListPopup"></view>
+    <view class="sender-modal sender-list-modal" wx:if="{{showSenderListPopup}}">
+      <view class="sender-modal-title">选择收件人</view>
+      <text class="sender-modal-subtitle">请选择已保存的收件信息，也可新增后再选择</text>
+      <view class="sender-list-body">
+        <view class="sender-list-item" wx:for="{{senderList}}" wx:key="index" data-index="{{index}}" bindtap="selectSenderByIndex">
+          <text class="sender-list-text">{{item.name}} {{item.phone}}</text>
+          <view class="sender-list-del" data-index="{{index}}" catchtap="onDeleteSenderTap">删除</view>
+        </view>
+      </view>
+      <view class="sender-modal-footer">
+        <view class="sender-modal-btn cancel" catchtap="closeSenderListPopup">取消</view>
+        <view class="sender-modal-btn confirm" catchtap="openSenderModal">新增收件人</view>
+      </view>
+    </view>
+
+    <view class="sender-modal-mask" wx:if="{{showSenderModal}}" catchtap="closeSenderModal"></view>
+    <view class="sender-modal" wx:if="{{showSenderModal}}">
+      <view class="sender-modal-title">新增收件人</view>
+      <text class="sender-modal-subtitle">请填写真实姓名与手机号，便于联系签收</text>
+      <view class="sender-modal-body">
+        <view class="sender-modal-row">
+          <text class="sender-modal-label">姓名</text>
+          <input class="sender-modal-input" placeholder="请输入姓名" value="{{modalSenderName}}" bindinput="onModalSenderNameInput" />
+        </view>
+        <view class="sender-modal-row">
+          <text class="sender-modal-label">手机号</text>
+          <input class="sender-modal-input" type="number" placeholder="请输入手机号" value="{{modalSenderPhone}}" bindinput="onModalSenderPhoneInput" />
+        </view>
+      </view>
+      <view class="sender-modal-footer">
+        <view class="sender-modal-btn cancel" catchtap="closeSenderModal">取消</view>
+        <view class="sender-modal-btn confirm" catchtap="confirmAddSender">确定</view>
+      </view>
+    </view>
+
+    <view class="cell-group logistics-group">
+      <view class="cell-group-title">物流公司</view>
+      <view class="cell cell-input-wrap logistics-input-wrap" mark:dropdownArea="1">
+        <input
+          class="cell-input"
+          placeholder="选填，不能自定义物流公司"
+          placeholder-class="input-placeholder"
+          value="{{logisticsFilter}}"
+          bindinput="onLogisticsCompanyInput"
+          bindfocus="onLogisticsCompanyFocus"
+          bindblur="onLogisticsCompanyBlur"
+        />
+        <scroll-view
+          wx:if="{{showLogisticsSuggest && logisticsSuggestList.length > 0}}"
+          class="suggest-list suggest-list-scroll"
+          scroll-y="true"
+          bindtouchstart="onLogisticsSuggestTouch"
+        >
+          <view
+            class="suggest-item"
+            wx:for="{{logisticsSuggestList}}"
+            wx:key="*this"
+            data-value="{{item}}"
+            bindtouchstart="onDropdownOptionTouchStart"
+            bindtouchmove="onDropdownOptionTouchMove"
+            bindtouchend="onLogisticsOptionTouchEnd"
+          >{{item}}</view>
+        </scroll-view>
+      </view>
+    </view>
+
+    <!-- 订单编号 -->
+    <view class="cell-group">
+      <view class="cell-group-title">订单编号（主品）</view>
+      <view class="cell cell-input-wrap">
+        <input
+          class="cell-input"
+          placeholder="请填写主品订单编号"
+          placeholder-class="input-placeholder"
+          value="{{orderNoMain}}"
+          bindinput="onOrderNoMainInput"
+        />
+      </view>
+    </view>
+    <view class="cell-group">
+      <view class="cell-group-title">订单编号（加赠）</view>
+      <view class="cell cell-input-wrap">
+        <input
+          class="cell-input"
+          placeholder="请填写加赠订单编号"
+          placeholder-class="input-placeholder"
+          value="{{orderNoGift}}"
+          bindinput="onOrderNoGiftInput"
+        />
+      </view>
+    </view>
+
+    <!-- 图片上传 -->
+    <view class="cell-group">
+      <view class="cell-group-title">图片</view>
+      <view class="upload-wrap">
+        <view class="upload-list">
+          <view class="upload-item" wx:for="{{imageUrls}}" wx:key="*this">
+            <image class="upload-img" src="{{item}}" mode="aspectFill" />
+            <view class="upload-del" data-index="{{index}}" bindtap="removeImage">×</view>
+          </view>
+          <view class="upload-add" bindtap="chooseImage" wx:if="{{imageUrls.length < 9}}">
+            <text class="upload-add-icon">+</text>
+            <text class="upload-add-text">上传图片</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 下单地址（只读） -->
+    <view class="cell-group cell-group-address" wx:if="{{deliveryAddressText}}">
+      <view class="cell-group-title">下单地址</view>
+      <view class="cell-address-readonly">{{deliveryAddressText}}</view>
+    </view>
+
+    <!-- 签收日期 -->
+    <view class="cell-group">
+      <view class="cell-group-title">签收日期</view>
+      <picker mode="date" value="{{signDateStr}}" bindchange="onSignDateChange">
+        <view class="cell cell-picker">
+          <text class="{{signDateStr ? 'picker-value' : 'picker-placeholder'}}">{{signDateStr || '请选择日期'}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 备注 -->
+    <view class="cell-group">
+      <view class="cell-group-title">备注</view>
+      <view class="cell cell-textarea-wrap">
+        <textarea
+          class="cell-textarea"
+          placeholder="为避免你我忘记,备忘填写到这里"
+          placeholder-class="input-placeholder"
+          value="{{remark}}"
+          bindinput="onRemarkInput"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="footer" wx:if="{{currentPlan}}">
+    <button class="footer-btn footer-draft" bindtap="saveDraft">保存草稿</button>
+    <button class="footer-btn footer-submit" type="primary" bindtap="submitForm">提交</button>
+  </view>
+</view>

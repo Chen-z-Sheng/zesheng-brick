@@ -1,0 +1,61 @@
+# Maven 构建产物（核心，覆盖父工程+所有子模块的target）
+target/
+!/.mvn/wrapper/maven-wrapper.jar  # 保留maven wrapper
+
+# Gradle 构建产物
+/build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+.nb-gradle/
+
+# IntelliJ IDEA（简化：直接忽略整个.idea目录）
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+
+# VS Code
+.vscode/
+
+# Mac OS
+.DS_Store
+
+# Maven 临时文件
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Java 编译/运行产物
+*.class
+*.log
+logs/
+temp/
+tmp/
+
+# 打包产物
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar

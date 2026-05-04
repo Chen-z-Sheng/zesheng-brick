@@ -1,0 +1,72 @@
+{
+    "pages": [
+        "pages/index/index",
+        "pages/market/market",
+        "pages/form/form",
+        "pages/my/my",
+        "pages/detail/detail",
+        "pages/form-schemes/form-schemes",
+        "pages/sell-order/sell-order",
+        "pages/order-list/order-list",
+        "pages/order-detail/order-detail",
+        "pages/login/login",
+        "pages/sms-login/sms-login",
+        "pages/profile/profile",
+        "pages/payment-info/payment-info",
+        "pages/help-center/help-center",
+        "pages/feedback/feedback",
+        "pages/feedback-history/feedback-history",
+        "pages/about/about",
+        "pages/announcement-history/index",
+        "pages/customer-service/customer-service",
+        "pages/webview/webview"
+    ],
+    "lazyCodeLoading": "requiredComponents",
+    "plugins": {
+        "myPlugin": {
+            "version": "1.4.14",
+            "provider": "wx8c631f7e9f2465e1"
+        }
+    },
+    "window": {
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#f7f7f7",
+        "backgroundTextStyle": "dark",
+        "navigationBarBackgroundColor": "#ffffff",
+        "navigationBarTitleText": "泽晟搬砖助手"
+    },
+    "sitemapLocation": "sitemap.json",
+    "style": "v2",
+    "tabBar": {
+        "color": "#999999",
+        "selectedColor": "#07c160",
+        "backgroundColor": "#ffffff",
+        "borderStyle": "white",
+        "list": [
+            {
+                "pagePath": "pages/index/index",
+                "text": "首页",
+                "iconPath": "/images/icon/home.png",
+                "selectedIconPath": "/images/icon/home-avtice.png"
+            },
+            {
+                "pagePath": "pages/market/market",
+                "text": "行情",
+                "iconPath": "/images/icon/market.png",
+                "selectedIconPath": "/images/icon/market-active.png"
+            },
+            {
+                "pagePath": "pages/form/form",
+                "text": "报单",
+                "iconPath": "/images/icon/form.png",
+                "selectedIconPath": "/images/icon/form-active.png"
+            },
+            {
+                "pagePath": "pages/my/my",
+                "text": "我的",
+                "iconPath": "/images/icon/my.png",
+                "selectedIconPath": "/images/icon/my-active.png"
+            }
+        ]
+    }
+}

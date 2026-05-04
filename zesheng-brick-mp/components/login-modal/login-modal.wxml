@@ -1,0 +1,61 @@
+<view class="modal-container" wx:if="{{visible}}" bindtap="handleModalClose">
+    <view class="modal-content" catchtap="catchTap">
+        <view class="modal-grabber"></view>
+        <view class="modal-header">
+            <view class="modal-title-wrap">
+                <text class="modal-title">{{title}}</text>
+                <text class="modal-desc">{{desc}}</text>
+            </view>
+        </view>
+
+        <view class="login-panel">
+            <view class="brand-hero">
+                <view class="login-panel-title">欢迎登录泽晟搬砖助手</view>
+                <view class="login-panel-subtitle">登录后可查看订单、提交报单并同步个人数据</view>
+            </view>
+
+            <block wx:if="{{identityMode === 'donut'}}">
+                <view class="phone-mask-line">本机号码：{{phoneMask}}</view>
+                <view class="carrier-doc-row">
+                    <text class="carrier-link" catchtap="openCarrierDoc" data-which="cm">《中国移动认证条款》</text>
+                    <text class="carrier-split">·</text>
+                    <text class="carrier-link" catchtap="openCarrierDoc" data-which="cu">《联通统一认证条款》</text>
+                    <text class="carrier-split">·</text>
+                    <text class="carrier-link" catchtap="openCarrierDoc" data-which="ct">《天翼账号隐私协议》</text>
+                </view>
+                <checkbox-group class="agree-block" bindchange="onAgreeOperatorChange">
+                    <label class="agree-row">
+                        <checkbox value="agree" />
+                        <text class="agree-text">我已阅读并同意上述运营商条款，授权获取本机号码用于微信登录</text>
+                    </label>
+                </checkbox-group>
+                <button
+                    class="login-btn login-btn-primary"
+                    open-type="phoneOneClickLogin"
+                    bindphoneoneclicklogin="onPhoneOneClick"
+                    disabled="{{loading || !agreeOperator || !nativeOneClickReady}}"
+                    loading="{{loading}}"
+                >
+                    <text class="btn-text">微信登录</text>
+                </button>
+            </block>
+
+            <block wx:else>
+                <button
+                    class="login-btn login-btn-primary"
+                    open-type="getPhoneNumber"
+                    bindgetphonenumber="onPhoneQuickLogin"
+                    disabled="{{loading}}"
+                    loading="{{loading}}"
+                >
+                    <text class="btn-text">微信登录</text>
+                </button>
+            </block>
+
+            <button class="login-btn login-btn-secondary" bindtap="goSmsLogin" disabled="{{loading}}">
+                <text class="btn-text">手机号登录</text>
+            </button>
+            <text class="footer-tip">登录即代表你同意平台相关服务协议与隐私政策</text>
+        </view>
+    </view>
+</view>

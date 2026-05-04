@@ -1,0 +1,16 @@
+<view class='container'>
+   <image class="answerimage" src="https://res.wx.qq.com/mmspraiweb_node/dist/static/openaiplugin/img/answerImage.png"></image>
+   <block wx:if="{{!imgError}}">
+     <image
+       class="imgcard-img"
+       src="{{msg.data.url}}"
+       mode="widthFix"
+       bindload="onImgLoad"
+       binderror="onImgError"
+       bindtap="onPreviewImage"
+     ></image>
+   </block>
+   <view class="img-error" wx:else>
+     <text class="img-error-text">图片加载失败</text>
+   </view>
+</view>

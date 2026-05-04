@@ -1,0 +1,621 @@
+/* pages/form-schemes/form-schemes.wxss */
+page {
+  background: #f7f7f7;
+}
+
+.page {
+  width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 200rpx;
+  background: #f7f7f7;
+}
+
+/* 未登录提示 */
+.need-login-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.need-login-text {
+  font-size: 28rpx;
+  color: #bbbbbb;
+}
+
+/* ============================================
+   表单区域
+   ============================================ */
+.form {
+  padding: 16rpx 24rpx;
+  box-sizing: border-box;
+}
+
+/* 单元格组 */
+.cell-group {
+  background: #ffffff;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 1rpx 6rpx rgba(0, 0, 0, 0.04);
+}
+
+.cell-group-title {
+  padding: 20rpx 24rpx 0rpx;
+  font-size: 24rpx;
+  color: #999999;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.cell-group-title-row {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx 0;
+}
+
+.cell-group-title-text {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.title-help-btn {
+  margin-left: 10rpx;
+  width: 32rpx;
+  height: 32rpx;
+  line-height: 30rpx;
+  text-align: center;
+  font-size: 20rpx;
+  color: #bbbbbb;
+  border: 1rpx solid #cccccc;
+  border-radius: 50%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.required {
+  color: #ef4444;
+  margin-left: 4rpx;
+}
+
+/* 单元格 */
+.cell {
+  display: flex;
+  align-items: center;
+  min-height: 96rpx;
+  padding: 0 24rpx;
+  background: #ffffff;
+}
+
+.cell:not(:last-child) {
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.cell-bd {
+  flex: 1;
+  min-width: 0;
+}
+
+.cell-input {
+  width: 100%;
+  height: 96rpx;
+  font-size: 28rpx;
+  color: #333333;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.input-placeholder {
+  color: #bbbbbb;
+}
+
+/* ============================================
+   下单方案搜索+下拉
+   ============================================ */
+.cell-group.plan-scheme-group {
+  overflow: visible;
+  position: relative;
+  z-index: 200;
+}
+
+.plan-scheme-input-wrap {
+  position: relative;
+}
+
+.plan-dropdown-scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+.suggest-list-placeholder {
+  padding: 28rpx 24rpx;
+  font-size: 26rpx;
+  color: #bbbbbb;
+  text-align: center;
+}
+
+/* 已选方案展示 */
+.cell-scheme-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 88rpx;
+  padding: 0 24rpx;
+  background: #ffffff;
+}
+
+.cell-scheme-name {
+  font-size: 28rpx;
+  color: #1a1a1a;
+  flex: 1;
+  margin-right: 20rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-reset {
+  flex-shrink: 0;
+  font-size: 26rpx;
+  color: #07c160;
+}
+
+.btn-link {
+  font-size: 26rpx;
+  color: #07c160;
+}
+
+/* ============================================
+   下单地址只读
+   ============================================ */
+.cell-group-address .cell-address-readonly {
+  padding: 16rpx 24rpx 20rpx;
+  font-size: 26rpx;
+  color: #666666;
+  line-height: 1.6;
+}
+
+/* ============================================
+   步进器
+   ============================================ */
+.quantity-cell {
+  padding: 20rpx 24rpx;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  width: 220rpx;
+  height: 64rpx;
+  border: 1rpx solid #e5e5e5;
+  border-radius: 10rpx;
+  overflow: hidden;
+  background: #f7f7f7;
+}
+
+.stepper-minus,
+.stepper-plus {
+  width: 72rpx;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  color: #333333;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.stepper-minus {
+  border-right: 1rpx solid #e5e5e5;
+}
+
+.stepper-plus {
+  border-left: 1rpx solid #e5e5e5;
+}
+
+.stepper-minus:active,
+.stepper-plus:active {
+  background: #f5f5f5;
+}
+
+.stepper-num {
+  flex: 1;
+  height: 100%;
+  text-align: center;
+  font-size: 30rpx;
+  color: #1a1a1a;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-weight: 600;
+}
+
+/* ============================================
+   选择器
+   ============================================ */
+.cell-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 96rpx;
+  padding: 0 24rpx;
+}
+
+.picker-value {
+  font-size: 28rpx;
+  color: #1a1a1a;
+}
+
+.picker-placeholder {
+  font-size: 28rpx;
+  color: #bbbbbb;
+}
+
+.picker-arrow {
+  font-size: 28rpx;
+  color: #cccccc;
+  font-weight: 300;
+}
+
+/* ============================================
+   多行输入
+   ============================================ */
+.cell-textarea-wrap {
+  align-items: flex-start;
+  padding: 16rpx 24rpx 20rpx;
+}
+
+.cell-textarea {
+  width: 100%;
+  min-height: 160rpx;
+  font-size: 28rpx;
+  color: #333333;
+  line-height: 1.6;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+/* ============================================
+   图片上传
+   ============================================ */
+.upload-wrap {
+  padding: 0 24rpx 24rpx;
+}
+
+.upload-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.upload-item {
+  position: relative;
+  width: 190rpx;
+  height: 190rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.upload-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.upload-del {
+  position: absolute;
+  top: 4rpx;
+  right: 4rpx;
+  width: 44rpx;
+  height: 44rpx;
+  line-height: 44rpx;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 32rpx;
+  border-radius: 50%;
+  font-weight: 300;
+}
+
+.upload-add {
+  width: 190rpx;
+  height: 190rpx;
+  border: 2rpx dashed #dddddd;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  gap: 8rpx;
+}
+
+.upload-add:active {
+  background: #f0f0f0;
+}
+
+.upload-add-icon {
+  font-size: 48rpx;
+  color: #cccccc;
+  line-height: 1;
+}
+
+.upload-add-text {
+  font-size: 22rpx;
+  color: #cccccc;
+}
+
+/* ============================================
+   人员选择弹窗（Sender Modal） - bottom sheet
+   ============================================ */
+.sender-modal-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  animation: maskFadeIn 0.2s ease;
+}
+
+@keyframes maskFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 居中弹窗（新增表单） */
+.sender-modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 620rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  overflow: hidden;
+  z-index: 1001;
+  animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+  from { transform: translate(-50%, -50%) scale(0.85); opacity: 0; }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.sender-modal-title {
+  padding: 36rpx 32rpx 0;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+.sender-modal-subtitle {
+  display: block;
+  padding: 10rpx 32rpx 0;
+  text-align: center;
+  font-size: 22rpx;
+  color: #999999;
+}
+
+.sender-modal-subtitle {
+  display: block;
+  padding: 10rpx 32rpx 0;
+  text-align: center;
+  font-size: 22rpx;
+  color: #999999;
+}
+
+.sender-modal-body {
+  padding: 28rpx 32rpx 0;
+}
+
+.sender-modal-row {
+  margin-bottom: 20rpx;
+}
+
+.sender-modal-label {
+  display: block;
+  font-size: 26rpx;
+  color: #999999;
+  margin-bottom: 10rpx;
+}
+
+.sender-modal-input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: #1a1a1a;
+  background: #f8fafc;
+  border-radius: 14rpx;
+  box-sizing: border-box;
+  border: 2rpx solid transparent;
+  transition: border-color 0.15s;
+}
+
+.sender-modal-footer {
+  display: flex;
+  border-top: 1rpx solid #f5f5f5;
+  margin-top: 24rpx;
+}
+
+.sender-modal-btn {
+  flex: 1;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.sender-modal-btn:active {
+  background: #f7f7f7;
+}
+
+.sender-modal-btn.cancel {
+  color: #666666;
+  border-right: 1rpx solid #f5f5f5;
+}
+
+.sender-modal-btn.confirm {
+  color: #07c160;
+  font-weight: 600;
+}
+
+/* 列表弹窗 */
+.sender-list-modal {
+  width: 580rpx;
+}
+
+.sender-list-body {
+  max-height: 480rpx;
+  overflow-y: auto;
+  padding: 8rpx 28rpx 0;
+}
+
+.sender-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 96rpx;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+  transition: background 0.15s;
+}
+
+.sender-list-item:last-child {
+  border-bottom: none;
+}
+
+.sender-list-item:active {
+  background: #f9f9f9;
+}
+
+.sender-list-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #1a1a1a;
+  margin-right: 24rpx;
+}
+
+.sender-list-del {
+  font-size: 24rpx;
+  color: #ef4444;
+  padding: 8rpx 16rpx;
+  flex-shrink: 0;
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: 999rpx;
+}
+
+/* ============================================
+   物流公司下拉联想
+   ============================================ */
+.cell-group.logistics-group {
+  overflow: visible;
+  position: relative;
+  z-index: 100;
+}
+
+.logistics-input-wrap {
+  position: relative;
+}
+
+.suggest-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4rpx);
+  max-height: 400rpx;
+  background: #ffffff;
+  border-radius: 12rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+  z-index: 500;
+  border: 1rpx solid #f0f0f0;
+  overflow: hidden;
+}
+
+.suggest-list-scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  max-height: 400rpx;
+  box-sizing: border-box;
+}
+
+.suggest-item {
+  padding: 24rpx;
+  font-size: 28rpx;
+  color: #333333;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.suggest-item:last-child {
+  border-bottom: none;
+}
+
+.suggest-item:active {
+  background: #f5f5f5;
+}
+
+/* ============================================
+   底部操作栏（Fixed）
+   ============================================ */
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+  padding: 16rpx 24rpx calc(16rpx + constant(safe-area-inset-bottom));
+  display: flex;
+  gap: 20rpx;
+  background: #ffffff;
+  border-top: 1rpx solid #f0f0f0;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+.footer-btn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.footer-btn::after {
+  border: none;
+}
+
+.footer-draft {
+  background: #f5f5f5;
+  color: #666666;
+  border: 1rpx solid #e5e5e5;
+}
+
+.footer-draft:active {
+  background: #ebebeb;
+}
+
+.footer-submit {
+  background: #07c160;
+  color: #ffffff;
+  flex: 2;
+}
+
+.footer-submit:active {
+  background: #06ad56;
+}

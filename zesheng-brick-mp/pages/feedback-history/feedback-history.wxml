@@ -1,0 +1,26 @@
+<view class="page">
+    <view class="page-header">
+        <text class="page-title">反馈历史</text>
+    </view>
+
+    <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+    <block wx:elif="{{list.length > 0}}">
+        <view class="feedback-card" wx:for="{{list}}" wx:key="id">
+            <view class="card-header">
+                <text class="type-tag">{{item.feedbackType}}</text>
+                <text class="time">{{item.createdAtText}}</text>
+            </view>
+            <text class="content">{{item.content}}</text>
+            <view class="reply-box">
+                <text class="reply-title">管理员回复</text>
+                <text class="reply-content {{item.replyContent ? '' : 'reply-empty'}}">{{item.replyContent || '暂未回复，请耐心等待'}}</text>
+            </view>
+        </view>
+    </block>
+
+    <view wx:else class="empty">
+        <text class="empty-icon">📭</text>
+        <text>暂无反馈记录</text>
+    </view>
+</view>

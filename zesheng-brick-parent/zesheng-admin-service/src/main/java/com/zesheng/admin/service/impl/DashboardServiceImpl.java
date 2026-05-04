@@ -1,0 +1,167 @@
+package com.zesheng.admin.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.zesheng.admin.entity.ClientUser;
+import com.zesheng.admin.entity.FormSubmission;
+import com.zesheng.admin.entity.SellOrderSubmission;
+import com.zesheng.admin.mapper.ClientUserMapper;
+import com.zesheng.admin.mapper.FormSubmissionMapper;
+import com.zesheng.admin.mapper.SellOrderSubmissionMapper;
+import com.zesheng.admin.model.response.DashboardDayCountItem;
+import com.zesheng.admin.model.response.DashboardOverviewResponse;
+import com.zesheng.admin.model.response.DashboardServerRuntimeVO;
+import com.zesheng.admin.service.IDashboardService;
+import com.sun.management.OperatingSystemMXBean;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
+import java.lang.management.RuntimeMXBean;
+import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 首页统计：业务表按日聚合 + 本机运行指标
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class DashboardServiceImpl implements IDashboardService {
+
+    private static final int RECENT_DAYS = 7;
+
+    private final FormSubmissionMapper formSubmissionMapper;
+    private final ClientUserMapper clientUserMapper;
+    private final SellOrderSubmissionMapper sellOrderSubmissionMapper;
+
+    @Override
+    public DashboardOverviewResponse getOverview() {
+        LocalDate today = LocalDate.now();
+        LocalDate startDay = today.minusDays(RECENT_DAYS - 1);
+        DateTimeFormatter labelFmt = DateTimeFormatter.ofPattern("MM-dd");
+
+        List<DashboardDayCountItem> formDaily = new ArrayList<>();
+        for (LocalDate d = startDay; !d.isAfter(today); d = d.plusDays(1)) {
+            formDaily.add(new DashboardDayCountItem(d.format(labelFmt), countFormForDay(d)));
+        }
+
+        List<DashboardDayCountItem> userDaily = new ArrayList<>();
+        for (LocalDate d = startDay; !d.isAfter(today); d = d.plusDays(1)) {
+            userDaily.add(new DashboardDayCountItem(d.format(labelFmt), countClientUserForDay(d)));
+        }
+
+        List<DashboardDayCountItem> sellDaily = new ArrayList<>();
+        for (LocalDate d = startDay; !d.isAfter(today); d = d.plusDays(1)) {
+            sellDaily.add(new DashboardDayCountItem(d.format(labelFmt), countSellOrderForDay(d)));
+        }
+
+        return DashboardOverviewResponse.builder()
+                .formSubmissionDaily(formDaily)
+                .formSubmissionToday(countFormForDay(today))
+                .formSubmissionYesterday(countFormForDay(today.minusDays(1)))
+                .clientUserTotal(clientUserMapper.selectCount(null))
+                .clientUserRegisterDaily(userDaily)
+                .clientUserRegisterToday(countClientUserForDay(today))
+                .clientUserRegisterYesterday(countClientUserForDay(today.minusDays(1)))
+                .sellOrderDaily(sellDaily)
+                .sellOrderToday(countSellOrderForDay(today))
+                .sellOrderYesterday(countSellOrderForDay(today.minusDays(1)))
+                .serverRuntime(buildServerRuntime())
+                .build();
+    }
+
+    @Override
+    public DashboardServerRuntimeVO getServerRuntime() {
+        return buildServerRuntime();
+    }
+
+    private long countFormForDay(LocalDate day) {
+        LocalDateTime start = day.atStartOfDay();
+        LocalDateTime end = day.plusDays(1).atStartOfDay();
+        return formSubmissionMapper.selectCount(
+                new LambdaQueryWrapper<FormSubmission>()
+                        .ge(FormSubmission::getCreatedAt, start)
+                        .lt(FormSubmission::getCreatedAt, end));
+    }
+
+    private long countClientUserForDay(LocalDate day) {
+        LocalDateTime start = day.atStartOfDay();
+        LocalDateTime end = day.plusDays(1).atStartOfDay();
+        return clientUserMapper.selectCount(
+                new LambdaQueryWrapper<ClientUser>()
+                        .ge(ClientUser::getCreatedAt, start)
+                        .lt(ClientUser::getCreatedAt, end));
+    }
+
+    private long countSellOrderForDay(LocalDate day) {
+        LocalDateTime start = day.atStartOfDay();
+        LocalDateTime end = day.plusDays(1).atStartOfDay();
+        return sellOrderSubmissionMapper.selectCount(
+                new LambdaQueryWrapper<SellOrderSubmission>()
+                        .ge(SellOrderSubmission::getCreatedAt, start)
+                        .lt(SellOrderSubmission::getCreatedAt, end));
+    }
+
+    private DashboardServerRuntimeVO buildServerRuntime() {
+        MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+        MemoryUsage heap = memoryBean.getHeapMemoryUsage();
+        long heapUsed = heap.getUsed();
+        long heapMax = heap.getMax() > 0 ? heap.getMax() : heap.getCommitted();
+        double heapPct = heapMax > 0 ? (heapUsed * 100.0 / heapMax) : 0.0;
+
+        Double cpuPct = null;
+        Double memPct = null;
+        try {
+            OperatingSystemMXBean os = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+            double load = os.getSystemCpuLoad();
+            if (load >= 0) {
+                cpuPct = round2(load * 100.0);
+            }
+            long totalMem = os.getTotalPhysicalMemorySize();
+            long freeMem = os.getFreePhysicalMemorySize();
+            if (totalMem > 0) {
+                memPct = round2((totalMem - freeMem) * 100.0 / totalMem);
+            }
+        } catch (Throwable e) {
+            log.debug("读取 OSBean 指标失败: {}", e.getMessage());
+        }
+
+        Double diskPct = null;
+        String diskNote = null;
+        try {
+            Path base = Path.of("").toAbsolutePath();
+            File root = base.getRoot() != null ? base.getRoot().toFile() : base.toFile();
+            long total = root.getTotalSpace();
+            long free = root.getFreeSpace();
+            diskNote = root.getAbsolutePath();
+            if (total > 0) {
+                diskPct = round2((total - free) * 100.0 / total);
+            }
+        } catch (Throwable e) {
+            log.debug("读取磁盘使用率失败: {}", e.getMessage());
+        }
+
+        RuntimeMXBean rt = ManagementFactory.getRuntimeMXBean();
+
+        return DashboardServerRuntimeVO.builder()
+                .systemCpuLoadPercent(cpuPct)
+                .physicalMemoryUsedPercent(memPct)
+                .jvmHeapUsedPercent(round2(heapPct))
+                .diskUsedPercent(diskPct)
+                .diskPathNote(diskNote)
+                .jvmUptimeMs(rt.getUptime())
+                .build();
+    }
+
+    private static double round2(double v) {
+        return Math.round(v * 100.0) / 100.0;
+    }
+}

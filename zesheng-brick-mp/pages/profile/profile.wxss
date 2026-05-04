@@ -1,0 +1,146 @@
+/* pages/profile/profile.wxss - 个人信息页，遵循微信 UI 规范 */
+.container {
+    background-color: #f7f7f7;
+    padding: 24rpx;
+    padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* 顶部标题区 */
+.page-header {
+    padding: 16rpx 8rpx 24rpx;
+}
+
+.page-title {
+    font-size: 36rpx;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+/* 表单卡片 */
+.form-card {
+    background: #ffffff;
+    border-radius: 24rpx;
+    overflow: hidden;
+    margin-bottom: 32rpx;
+}
+
+/* 表单项 */
+.form-item {
+    display: flex;
+    align-items: center;
+    min-height: 104rpx;
+    padding: 0 32rpx;
+    border-bottom: 1rpx solid #f0f0f0;
+    transition: background-color 0.15s ease;
+}
+
+.form-item:last-child {
+    border-bottom: none;
+}
+
+.form-item:active {
+    background-color: #f9f9f9;
+}
+
+.form-label {
+    width: 160rpx;
+    font-size: 32rpx;
+    color: #1a1a1a;
+    flex-shrink: 0;
+}
+
+.form-input {
+    flex: 1;
+    height: 104rpx;
+    font-size: 32rpx;
+    color: #1a1a1a;
+    text-align: right;
+}
+
+.form-input-placeholder {
+    color: #b0b0b0;
+    font-size: 32rpx;
+}
+
+.form-value {
+    flex: 1;
+    font-size: 32rpx;
+    color: #999999;
+    text-align: right;
+}
+
+.form-arrow {
+    margin-left: 12rpx;
+    font-size: 28rpx;
+    color: #b0b0b0;
+    flex-shrink: 0;
+}
+
+/* 微信名按钮 */
+.wechat-name-btn {
+    margin: 0;
+    padding: 0 24rpx;
+    height: 56rpx;
+    line-height: 56rpx;
+    font-size: 24rpx;
+    color: #07c160;
+    background: rgba(7, 193, 96, 0.08);
+    border: none;
+    border-radius: 28rpx;
+    flex-shrink: 0;
+    margin-left: 16rpx;
+}
+
+.wechat-name-btn::after {
+    border: none;
+}
+
+.wechat-name-btn:active {
+    background: rgba(7, 193, 96, 0.15);
+}
+
+/* 保存按钮 */
+.save-section {
+    margin-top: 48rpx;
+    padding: 0 8rpx;
+}
+
+.save-btn {
+    width: 100%;
+    height: 92rpx;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: 34rpx;
+    font-weight: 500;
+    color: #ffffff;
+    background: #07c160;
+    border-radius: 16rpx;
+    border: none;
+    transition: opacity 0.2s ease;
+}
+
+.save-btn::after {
+    border: none;
+}
+
+.save-btn:active {
+    opacity: 0.85;
+}
+
+/* 提示语 */
+.tips-section {
+    margin-top: 32rpx;
+    padding: 0 8rpx;
+}
+
+.tips-text {
+    font-size: 26rpx;
+    color: #b0b0b0;
+    line-height: 1.6;
+}

@@ -1,0 +1,126 @@
+<view class="index-page">
+  <!-- 公告弹窗 -->
+  <view class="popup-mask" wx:if="{{announcementPopup}}" bindtap="onAnnouncementRemindLater">
+    <view class="popup-box" catchtap="onPopupBoxTap">
+      <view class="popup-header">
+        <view class="popup-icon-wrap">
+          <text class="popup-icon">📢</text>
+        </view>
+        <text class="popup-title">{{announcementPopup.title}}</text>
+        <text class="popup-date">{{announcementPopup.formattedDate}}</text>
+        <view class="popup-close" bindtap="onAnnouncementRemindLater">×</view>
+      </view>
+      <view class="popup-hint">
+        <text>请及时查看公告内容，避免影响下单与结算</text>
+      </view>
+      <view class="popup-body">
+        <rich-text nodes="{{announcementPopup.content}}" class="popup-content"></rich-text>
+      </view>
+      <view class="popup-footer">
+        <view class="popup-btn popup-btn-primary" catchtap="onAnnouncementAcknowledge">我知道了</view>
+        <view class="popup-btn popup-btn-ghost" catchtap="onAnnouncementRemindLater">稍后提醒</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 轮播图 -->
+  <view class="banner-wrap" wx:if="{{bannerList.length > 0}}">
+    <swiper
+      class="banner-swiper"
+      autoplay="true"
+      interval="3000"
+      duration="500"
+      circular="true"
+      indicator-dots="true"
+      indicator-color="rgba(255,255,255,0.5)"
+      indicator-active-color="#ffffff"
+    >
+      <swiper-item wx:for="{{bannerList}}" wx:key="*this">
+        <image src="{{item}}" mode="aspectFill" class="banner-image"></image>
+      </swiper-item>
+    </swiper>
+  </view>
+
+  <!-- 公告栏 -->
+  <view class="notice-bar" bindtap="onAnnouncementTap">
+    <view class="notice-bar-left">
+      <text class="notice-bar-icon">📢</text>
+      <text class="notice-bar-tag">公告</text>
+    </view>
+    <view class="notice-bar-content">
+      <text class="notice-measure-text">{{announcementText}}</text>
+      <view wx:if="{{needScroll}}" class="notice-scroll-wrap">
+        <view class="notice-marquee" style="animation-duration: {{announcementScrollDuration}}s;">
+          <text class="notice-text notice-text-item">{{announcementText}}</text>
+          <text class="notice-text notice-text-item">{{announcementText}}</text>
+        </view>
+      </view>
+      <view wx:else class="notice-static-wrap">
+        <text class="notice-text notice-text-static">{{announcementText}}</text>
+      </view>
+    </view>
+    <view class="notice-bar-arrow">
+      <view class="arrow-right"></view>
+    </view>
+  </view>
+
+  <!-- 标准流程卡片 -->
+  <view class="card-section">
+    <view class="card-header">
+      <view class="card-title-bar"></view>
+      <text class="card-title">服务流程</text>
+    </view>
+    <view class="process-row">
+      <view class="process-step">
+        <view class="process-step-icon">
+          <image src="/images/process/scheme.png" mode="widthFix" class="step-img" />
+        </view>
+        <text class="process-step-name">下单</text>
+      </view>
+      <view class="process-arrow-wrap">
+        <view class="process-arrow"></view>
+      </view>
+      <view class="process-step">
+        <view class="process-step-icon">
+          <image src="/images/process/send.png" mode="widthFix" class="step-img" />
+        </view>
+        <text class="process-step-name">到货转寄</text>
+      </view>
+      <view class="process-arrow-wrap">
+        <view class="process-arrow"></view>
+      </view>
+      <view class="process-step">
+        <view class="process-step-icon">
+          <image src="/images/process/inspection.png" mode="widthFix" class="step-img" />
+        </view>
+        <text class="process-step-name">验货入库</text>
+      </view>
+      <view class="process-arrow-wrap">
+        <view class="process-arrow"></view>
+      </view>
+      <view class="process-step">
+        <view class="process-step-icon">
+          <image src="/images/process/payment.png" mode="widthFix" class="step-img" />
+        </view>
+        <text class="process-step-name">结算打款</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系方式 -->
+  <view class="contact-card" bindtap="copyContact" data-contact="{{contact}}">
+    <view class="contact-card-left">
+      <view class="contact-icon-wrap">
+        <text class="contact-icon">💬</text>
+      </view>
+      <view class="contact-info">
+        <text class="contact-label">微信联系方式</text>
+        <text class="contact-value">{{contact ? contact : '暂未配置'}}</text>
+      </view>
+    </view>
+    <view class="contact-copy-btn">
+      <text class="contact-copy-text">复制</text>
+    </view>
+  </view>
+
+</view>

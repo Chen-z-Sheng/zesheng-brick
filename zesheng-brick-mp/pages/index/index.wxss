@@ -1,0 +1,465 @@
+/* pages/index/index.wxss */
+.index-page {
+  min-height: 100vh;
+  background: #f7f7f7;
+  padding-bottom: 32rpx;
+}
+
+/* ============================================
+   轮播图
+   ============================================ */
+.banner-wrap {
+  width: 100%;
+}
+
+.banner-swiper {
+  width: 100%;
+  height: 340rpx;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================
+   公告栏 - 微信原生风格
+   ============================================ */
+.notice-bar {
+  display: flex;
+  align-items: center;
+  background: #fffbe6;
+  padding: 0 28rpx;
+  height: 72rpx;
+  border-bottom: 1rpx solid #ffe58f;
+}
+
+.notice-bar:active {
+  background: #fff7cc;
+}
+
+.notice-bar-left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-right: 16rpx;
+  gap: 8rpx;
+}
+
+.notice-bar-icon {
+  font-size: 28rpx;
+}
+
+.notice-bar-tag {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #d46b08;
+  background: rgba(250, 173, 20, 0.2);
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  flex-shrink: 0;
+}
+
+.notice-bar-content {
+  flex: 1;
+  height: 40rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.notice-measure-text {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: 26rpx;
+}
+
+.notice-scroll-wrap {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.notice-marquee {
+  display: inline-flex;
+  align-items: center;
+  height: 40rpx;
+  white-space: nowrap;
+  animation-name: noticeScroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes noticeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.notice-text {
+  font-size: 26rpx;
+  color: #333333;
+  line-height: 40rpx;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.notice-text-item {
+  padding-right: 100rpx;
+  flex-shrink: 0;
+}
+
+.notice-static-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.notice-text-static {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.notice-bar-arrow {
+  flex-shrink: 0;
+  margin-left: 12rpx;
+  display: flex;
+  align-items: center;
+}
+
+.arrow-right {
+  width: 14rpx;
+  height: 14rpx;
+  border-top: 2rpx solid #d46b08;
+  border-right: 2rpx solid #d46b08;
+  transform: rotate(45deg);
+}
+
+/* ============================================
+   卡片通用
+   ============================================ */
+.card-section {
+  background: #ffffff;
+  margin: 16rpx 24rpx 0;
+  border-radius: 16rpx;
+  padding: 28rpx 28rpx 32rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin-bottom: 28rpx;
+}
+
+.card-title-bar {
+  width: 6rpx;
+  height: 32rpx;
+  background: #07c160;
+  border-radius: 3rpx;
+  flex-shrink: 0;
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* ============================================
+   流程图
+   ============================================ */
+.process-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.process-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.process-step-icon {
+  width: 88rpx;
+  height: 88rpx;
+  background: rgba(7, 193, 96, 0.08);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.step-img {
+  width: 52rpx;
+}
+
+.process-step-name {
+  font-size: 24rpx;
+  color: #666666;
+  text-align: center;
+  font-weight: 500;
+}
+
+.process-arrow-wrap {
+  flex-shrink: 0;
+  width: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.process-arrow {
+  width: 16rpx;
+  height: 16rpx;
+  border-top: 3rpx solid #cccccc;
+  border-right: 3rpx solid #cccccc;
+  transform: rotate(45deg);
+  margin-top: -22rpx; /* 对齐图标中部 */
+}
+
+/* ============================================
+   联系方式卡片
+   ============================================ */
+.contact-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  margin: 16rpx 24rpx 0;
+  border-radius: 16rpx;
+  padding: 24rpx 28rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.contact-card:active {
+  background: #fafafa;
+}
+
+.contact-card-left {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  flex: 1;
+}
+
+.contact-icon-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(7, 193, 96, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.contact-icon {
+  font-size: 36rpx;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-label {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.contact-value {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  word-break: break-all;
+}
+
+.contact-copy-btn {
+  flex-shrink: 0;
+  background: #07c160;
+  border-radius: 24rpx;
+  padding: 12rpx 28rpx;
+}
+
+.contact-copy-text {
+  font-size: 26rpx;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* ============================================
+   公告弹窗
+   ============================================ */
+.popup-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx;
+  box-sizing: border-box;
+}
+
+.popup-box {
+  width: 100%;
+  max-width: 620rpx;
+  max-height: 70vh;
+  background: #ffffff;
+  border-radius: 28rpx;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 32rpx 80rpx rgba(0, 0, 0, 0.25);
+}
+
+.popup-header {
+  padding: 32rpx 28rpx 20rpx;
+  text-align: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.popup-close {
+  position: absolute;
+  right: 20rpx;
+  top: 20rpx;
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999999;
+  font-size: 32rpx;
+  font-weight: 300;
+}
+
+.popup-close:active {
+  background: #e5e5e5;
+}
+
+.popup-icon-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  background: linear-gradient(135deg, #07c160 0%, #059250 100%);
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16rpx;
+  box-shadow: 0 6rpx 16rpx rgba(7, 193, 96, 0.3);
+}
+
+.popup-icon {
+  font-size: 36rpx;
+}
+
+.popup-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.4;
+  word-break: break-word;
+  margin-bottom: 6rpx;
+}
+
+.popup-date {
+  font-size: 24rpx;
+  color: #8a8f98;
+  line-height: 1.4;
+  margin-top: 8rpx;
+  display: block;
+}
+
+.popup-hint {
+  padding: 0 28rpx 12rpx;
+  flex-shrink: 0;
+}
+
+.popup-hint text {
+  display: block;
+  text-align: center;
+  font-size: 24rpx;
+  color: #999999;
+  line-height: 1.5;
+  background: #f8f9fa;
+  padding: 12rpx 16rpx;
+  border-radius: 10rpx;
+}
+
+.popup-body {
+  flex: 1;
+  min-height: 0;
+  max-height: 400rpx;
+  padding: 0 28rpx;
+  box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.popup-content {
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: #444444;
+  word-break: break-word;
+}
+
+.popup-footer {
+  padding: 16rpx 28rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border-top: 1rpx solid #f0f0f0;
+  background: #ffffff;
+}
+
+.popup-btn {
+  flex: 1;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 36rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  box-sizing: border-box;
+  border: 2rpx solid transparent;
+}
+
+.popup-btn:active {
+  opacity: 0.85;
+}
+
+.popup-btn-primary {
+  background: linear-gradient(135deg, #07c160 0%, #059250 100%);
+  color: #ffffff;
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.3);
+}
+
+.popup-btn-ghost {
+  background: #ffffff;
+  color: #555555;
+  border-color: #e0e0e0;
+}

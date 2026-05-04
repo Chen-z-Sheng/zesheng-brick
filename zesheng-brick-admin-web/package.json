@@ -1,0 +1,98 @@
+{
+  "name": "zesheng-brick-admin-web",
+  "version": "3.0.0",
+  "author": "Chen-z-Sheng",
+  "participants": [],
+  "homepage": "https://github.com/Chen-z-Sheng/zhesheng-brick-admin-web",
+  "scripts": {
+    "serve:rspack": "node --no-deprecation rspack.js serve",
+    "build": "rimraf dist && node --no-deprecation rspack.js build",
+    "build:zip": "rimraf dist && node --no-deprecation rspack.js build && node build-zip.cjs",
+    "clear": "rimraf node_modules&&npm install  --registry=--registry=https://registry.npmmirror.com",
+    "update": "ncu -u --reject chalk,sass,sass-loader --registry=https://registry.npmmirror.com&&pnpm i",
+    "push": "start ./push.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chen-z-Sheng/zhesheng-brick-admin-web.git"
+  },
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,vue}": [
+      "git add"
+    ]
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "@form-create/designer": "^3",
+    "@form-create/element-ui": "^3",
+    "@wangeditor/editor": "^5.1.23",
+    "@wangeditor/editor-for-vue": "^1.0.2",
+    "ant-design-vue": "^4.2.6",
+    "axios": "^1.13.2",
+    "caniuse-lite": "^1.0.30001756",
+    "clipboard": "^2.0.11",
+    "cropper-next-vue": "^0.1.0",
+    "core-js": "^3.47.0",
+    "dayjs": "^1.11.19",
+    "echarts": "6.0.0",
+    "element-plus": "^2.11.8",
+    "jsencrypt": "^3.5.4",
+    "jwt-decode": "^4.0.0",
+    "layouts": "file:layouts",
+    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
+    "mitt": "^3.0.1",
+    "mockjs": "^1.1.0",
+    "nprogress": "^0.2.0",
+    "qs": "^6.14.0",
+    "screenfull": "^6.0.2",
+    "vform3-builds": "^3.0.10",
+    "vue": "^3.5.24",
+    "vue-echarts": "^8.0.1",
+    "vue-router": "^4.6.3",
+    "vuedraggable": "^2.24.3",
+    "vuex": "^4.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@rspack/cli": "^1.6.4",
+    "@rspack/core": "^1.6.4",
+    "@rspack/dev-server": "^1.1.4",
+    "@vue/compiler-sfc": "^3.5.24",
+    "archiver": "^7.0.1",
+    "babel-loader": "^10.0.0",
+    "body-parser": "^2.2.0",
+    "chalk": "^4.1.2",
+    "chokidar": "^4.0.3",
+    "css-loader": "^7.1.2",
+    "dotenv": "^17.2.3",
+    "html-rspack-plugin": "^6.1.4",
+    "path-browserify": "^1.0.1",
+    "rimraf": "^6.1.0",
+    "sass": "1.94.1",
+    "sass-loader": "16.0.6",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.4",
+    "vue-loader": "^17.4.2"
+  },
+  "keywords": [
+    "vue",
+    "admin",
+    "dashboard",
+    "element-plus",
+    "vue-admin",
+    "element-admin",
+    "boilerplate",
+    "admin-template",
+    "management-system"
+  ],
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">= 7.0.0"
+  }
+}

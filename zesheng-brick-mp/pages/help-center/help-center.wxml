@@ -1,0 +1,63 @@
+<!--pages/help-center/help-center.wxml - 帮助中心-->
+<view class="page">
+    <!-- 搜索框 -->
+    <view class="search-section">
+        <view class="search-box">
+            <text class="search-icon">🔍</text>
+            <input
+                class="search-input"
+                placeholder="搜索常见问题"
+                placeholder-class="search-placeholder"
+                value="{{searchKeyword}}"
+                bindinput="onSearchInput"
+            />
+        </view>
+    </view>
+
+    <!-- 常见问题 -->
+    <view class="faq-section">
+        <text class="section-title">常见问题</text>
+        <view class="faq-loading" wx:if="{{faqLoading}}">
+            <text>加载中...</text>
+        </view>
+        <view class="faq-list" wx:elif="{{filteredFaqList.length > 0}}">
+            <view
+                class="faq-item {{item.expanded ? 'expanded' : ''}}"
+                wx:for="{{filteredFaqList}}"
+                wx:key="id"
+                bindtap="toggleFaq"
+                data-id="{{item.id}}"
+            >
+                <view class="faq-question">
+                    <text class="faq-q">{{item.question}}</text>
+                    <text class="faq-arrow">{{item.expanded ? '▲' : '▼'}}</text>
+                </view>
+                <view class="faq-answer" wx:if="{{item.expanded}}">
+                    <text class="faq-a">{{item.answer}}</text>
+                </view>
+            </view>
+        </view>
+        <view class="empty-tip" wx:else>
+            <text>暂无匹配问题，可尝试其他关键词或联系客服</text>
+        </view>
+    </view>
+
+    <!-- 底部客服区域 -->
+    <view class="contact-section">
+        <view class="contact-title">没有找到你的问题？</view>
+        <view class="contact-buttons">
+            <button class="contact-btn human" bindtap="onContactHuman" hover-class="contact-btn-hover-human">
+                <view class="contact-btn-inner">
+                    <text class="btn-icon">🧑‍💼</text>
+                    <text class="btn-text">人工客服</text>
+                </view>
+            </button>
+            <button class="contact-btn ai" bindtap="onGoFeedback" hover-class="contact-btn-hover-ai">
+                <view class="contact-btn-inner">
+                    <text class="btn-icon">📝</text>
+                    <text class="btn-text">问题反馈</text>
+                </view>
+            </button>
+        </view>
+    </view>
+</view>

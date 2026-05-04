@@ -1,0 +1,27 @@
+<view class="page-root">
+    <!-- 加载状态 -->
+    <view class="state-box" wx:if="{{loading}}">
+        <text class="state-title">智能客服连接中...</text>
+        <text class="state-desc">首次进入可能需要 1-2 秒</text>
+    </view>
+
+    <!-- 错误状态 -->
+    <view class="state-box" wx:elif="{{initError}}">
+        <text class="state-title state-title--error">暂时无法连接智能客服</text>
+        <text class="state-desc">{{initError}}</text>
+        <button class="retry-btn" bindtap="onRetryTap">重新连接</button>
+    </view>
+
+    <!-- 聊天界面 - 使用官方 chat 组件，自带输入栏 -->
+    <view class="chat-wrapper" wx:elif="{{flag}}">
+        <chat
+            class="chat-panel"
+            bind:queryCallback="getQueryCallback"
+            bind:backHome="goBackHome"
+            generic:textMessage="customTextMessage"
+            generic:imageMessage="customImageMessage"
+            generic:queryMessage="customQueryMessage"
+            generic:guideCard="customGuideCard"
+        ></chat>
+    </view>
+</view>

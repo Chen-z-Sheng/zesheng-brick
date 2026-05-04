@@ -1,0 +1,302 @@
+<view class="page">
+    <view class="tabs-wrap">
+        <scroll-view class="tabs-scroll" scroll-x scroll-with-animation show-scrollbar="{{false}}" enhanced>
+            <view class="tabs-inner">
+                <view
+                    class="tab {{currentIndex === index ? 'tab--on' : ''}}"
+                    wx:for="{{tabs}}"
+                    wx:key="key"
+                    data-index="{{index}}"
+                    bindtap="onTabTap"
+                >
+                    <text class="tab__text">{{item.label}}</text>
+                </view>
+            </view>
+        </scroll-view>
+    </view>
+
+    <swiper class="swiper" current="{{currentIndex}}" duration="280" bindchange="onSwiperChange">
+        <swiper-item>
+            <scroll-view class="panel" scroll-y enhanced show-scrollbar="{{false}}" bindscrolltolower="onReachBottom">
+                <view class="list" wx:if="{{listAll.length > 0}}">
+                    <view
+                        class="order-card"
+                        wx:for="{{listAll}}"
+                        wx:key="uniqueKey"
+                        data-type="{{item.type}}"
+                        data-id="{{item.id}}"
+                        bindtap="onCardTap"
+                    >
+                        <view class="order-card__head">
+                            <text class="order-card__type order-card__type--form" wx:if="{{item.type === 'form'}}">固结报单</text>
+                            <text class="order-card__type order-card__type--sell" wx:else>行情报单</text>
+                            <text class="order-card__status">{{item.statusCategoryText}}</text>
+                        </view>
+                        <view class="order-card__divider"></view>
+                        <view class="order-card__body">
+                            <block wx:if="{{item.type === 'form'}}">
+                                <view class="order-card__row"><text class="order-card__label">下单方案</text><text class="order-card__value">{{item.schemeName}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">数量</text><text class="order-card__value">{{item.quantity || 1}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">快递单号</text><text class="order-card__value">{{item.expressNo || '—'}}</text></view>
+                                <view class="order-card__logistics" wx:if="{{item.logisticsSummary}}">
+                                    <text class="order-card__logistics-label">最新物流</text>
+                                    <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
+                                    <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                </view>
+                            </block>
+                            <block wx:else>
+                                <view class="order-card__row"><text class="order-card__label">商品明细</text><text class="order-card__value order-card__value--multi">{{item.productDetail}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">快递单号</text><text class="order-card__value">{{item.logisticsNo || '—'}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">是否寄存</text><text class="order-card__value">{{item.depositText}}</text></view>
+                                <view class="order-card__logistics" wx:if="{{item.logisticsSummary}}">
+                                    <text class="order-card__logistics-label">最新物流</text>
+                                    <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
+                                    <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                </view>
+                            </block>
+                            <view class="order-card__admin-note" wx:if="{{item.adminInternalNote}}">
+                                <text class="order-card__admin-note-label">管理员备注</text>
+                                <text class="order-card__admin-note-value">{{item.adminInternalNote}}</text>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+                <view class="empty" wx:elif="{{!loading}}">
+                    <text class="empty__icon">📦</text>
+                    <text class="empty__title">暂无订单</text>
+                    <text class="empty__hint">去报单或出售商品后会显示在这里</text>
+                </view>
+                <view class="loading-wrap" wx:if="{{loading && listAll.length === 0}}">
+                    <text class="loading-wrap__text">加载中...</text>
+                </view>
+                <view class="nomore" wx:if="{{!hasMore_all && listAll.length > 0 && !loading}}">
+                    <text class="nomore__text">— 已加载全部 —</text>
+                </view>
+            </scroll-view>
+        </swiper-item>
+        <swiper-item>
+            <scroll-view class="panel" scroll-y enhanced show-scrollbar="{{false}}" bindscrolltolower="onReachBottom">
+                <view class="list" wx:if="{{listTransit.length > 0}}">
+                    <view
+                        class="order-card"
+                        wx:for="{{listTransit}}"
+                        wx:key="uniqueKey"
+                        data-type="{{item.type}}"
+                        data-id="{{item.id}}"
+                        bindtap="onCardTap"
+                    >
+                        <view class="order-card__head order-card__head--no-status">
+                            <text class="order-card__type order-card__type--form" wx:if="{{item.type === 'form'}}">固结报单</text>
+                            <text class="order-card__type order-card__type--sell" wx:else>行情报单</text>
+                        </view>
+                        <view class="order-card__divider"></view>
+                        <view class="order-card__body">
+                            <block wx:if="{{item.type === 'form'}}">
+                                <view class="order-card__row"><text class="order-card__label">下单方案</text><text class="order-card__value">{{item.schemeName}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">数量</text><text class="order-card__value">{{item.quantity || 1}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">快递单号</text><text class="order-card__value">{{item.expressNo || '—'}}</text></view>
+                                <view class="order-card__logistics" wx:if="{{item.logisticsSummary}}">
+                                    <text class="order-card__logistics-label">最新物流</text>
+                                    <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
+                                    <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                </view>
+                            </block>
+                            <block wx:else>
+                                <view class="order-card__row"><text class="order-card__label">商品明细</text><text class="order-card__value order-card__value--multi">{{item.productDetail}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">快递单号</text><text class="order-card__value">{{item.logisticsNo || '—'}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">是否寄存</text><text class="order-card__value">{{item.depositText}}</text></view>
+                                <view class="order-card__logistics" wx:if="{{item.logisticsSummary}}">
+                                    <text class="order-card__logistics-label">最新物流</text>
+                                    <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
+                                    <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                </view>
+                            </block>
+                            <view class="order-card__admin-note" wx:if="{{item.adminInternalNote}}">
+                                <text class="order-card__admin-note-label">管理员备注</text>
+                                <text class="order-card__admin-note-value">{{item.adminInternalNote}}</text>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+                <view class="empty" wx:elif="{{!loading}}">
+                    <text class="empty__icon">🚚</text>
+                    <text class="empty__title">运输中暂无订单</text>
+                </view>
+                <view class="loading-wrap" wx:if="{{loading && listTransit.length === 0}}">
+                    <text class="loading-wrap__text">加载中...</text>
+                </view>
+                <view class="nomore" wx:if="{{!hasMore_transit && listTransit.length > 0 && !loading}}">
+                    <text class="nomore__text">— 已加载全部 —</text>
+                </view>
+            </scroll-view>
+        </swiper-item>
+        <swiper-item>
+            <scroll-view class="panel" scroll-y enhanced show-scrollbar="{{false}}" bindscrolltolower="onReachBottom">
+                <view class="list" wx:if="{{listStoring.length > 0}}">
+                    <view
+                        class="order-card"
+                        wx:for="{{listStoring}}"
+                        wx:key="uniqueKey"
+                        data-type="{{item.type}}"
+                        data-id="{{item.id}}"
+                        bindtap="onCardTap"
+                    >
+                        <view class="order-card__head order-card__head--no-status">
+                            <text class="order-card__type order-card__type--form" wx:if="{{item.type === 'form'}}">固结报单</text>
+                            <text class="order-card__type order-card__type--sell" wx:else>行情报单</text>
+                        </view>
+                        <view class="order-card__divider"></view>
+                        <view class="order-card__body">
+                            <block wx:if="{{item.type === 'form'}}">
+                                <view class="order-card__row"><text class="order-card__label">下单方案</text><text class="order-card__value">{{item.schemeName}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">数量</text><text class="order-card__value">{{item.quantity || 1}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">快递单号</text><text class="order-card__value">{{item.expressNo || '—'}}</text></view>
+                                <view class="order-card__logistics" wx:if="{{item.logisticsSummary}}">
+                                    <text class="order-card__logistics-label">最新物流</text>
+                                    <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
+                                    <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                </view>
+                            </block>
+                            <block wx:else>
+                                <view class="order-card__row"><text class="order-card__label">商品明细</text><text class="order-card__value order-card__value--multi">{{item.productDetail}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">快递单号</text><text class="order-card__value">{{item.logisticsNo || '—'}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">是否寄存</text><text class="order-card__value">{{item.depositText}}</text></view>
+                                <view class="order-card__logistics" wx:if="{{item.logisticsSummary}}">
+                                    <text class="order-card__logistics-label">最新物流</text>
+                                    <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
+                                    <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                </view>
+                            </block>
+                            <view class="order-card__admin-note" wx:if="{{item.adminInternalNote}}">
+                                <text class="order-card__admin-note-label">管理员备注</text>
+                                <text class="order-card__admin-note-value">{{item.adminInternalNote}}</text>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+                <view class="empty" wx:elif="{{!loading}}">
+                    <text class="empty__icon">📥</text>
+                    <text class="empty__title">入库中暂无订单</text>
+                </view>
+                <view class="loading-wrap" wx:if="{{loading && listStoring.length === 0}}">
+                    <text class="loading-wrap__text">加载中...</text>
+                </view>
+                <view class="nomore" wx:if="{{!hasMore_storing && listStoring.length > 0 && !loading}}">
+                    <text class="nomore__text">— 已加载全部 —</text>
+                </view>
+            </scroll-view>
+        </swiper-item>
+        <swiper-item>
+            <scroll-view class="panel" scroll-y enhanced show-scrollbar="{{false}}" bindscrolltolower="onReachBottom">
+                <view class="list" wx:if="{{listCompleted.length > 0}}">
+                    <view
+                        class="order-card"
+                        wx:for="{{listCompleted}}"
+                        wx:key="uniqueKey"
+                        data-type="{{item.type}}"
+                        data-id="{{item.id}}"
+                        bindtap="onCardTap"
+                    >
+                        <view class="order-card__head order-card__head--no-status">
+                            <text class="order-card__type order-card__type--form" wx:if="{{item.type === 'form'}}">固结报单</text>
+                            <text class="order-card__type order-card__type--sell" wx:else>行情报单</text>
+                        </view>
+                        <view class="order-card__divider"></view>
+                        <view class="order-card__body">
+                            <block wx:if="{{item.type === 'form'}}">
+                                <view class="order-card__row"><text class="order-card__label">下单方案</text><text class="order-card__value">{{item.schemeName}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">数量</text><text class="order-card__value">{{item.quantity || 1}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">快递单号</text><text class="order-card__value">{{item.expressNo || '—'}}</text></view>
+                                <view class="order-card__logistics" wx:if="{{item.logisticsSummary}}">
+                                    <text class="order-card__logistics-label">最新物流</text>
+                                    <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
+                                    <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                </view>
+                            </block>
+                            <block wx:else>
+                                <view class="order-card__row"><text class="order-card__label">商品明细</text><text class="order-card__value order-card__value--multi">{{item.productDetail}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">快递单号</text><text class="order-card__value">{{item.logisticsNo || '—'}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">是否寄存</text><text class="order-card__value">{{item.depositText}}</text></view>
+                                <view class="order-card__logistics" wx:if="{{item.logisticsSummary}}">
+                                    <text class="order-card__logistics-label">最新物流</text>
+                                    <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
+                                    <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                </view>
+                            </block>
+                            <view class="order-card__admin-note" wx:if="{{item.adminInternalNote}}">
+                                <text class="order-card__admin-note-label">管理员备注</text>
+                                <text class="order-card__admin-note-value">{{item.adminInternalNote}}</text>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+                <view class="empty" wx:elif="{{!loading}}">
+                    <text class="empty__icon">✅</text>
+                    <text class="empty__title">已完成暂无订单</text>
+                </view>
+                <view class="loading-wrap" wx:if="{{loading && listCompleted.length === 0}}">
+                    <text class="loading-wrap__text">加载中...</text>
+                </view>
+                <view class="nomore" wx:if="{{!hasMore_completed && listCompleted.length > 0 && !loading}}">
+                    <text class="nomore__text">— 已加载全部 —</text>
+                </view>
+            </scroll-view>
+        </swiper-item>
+        <swiper-item>
+            <scroll-view class="panel" scroll-y enhanced show-scrollbar="{{false}}" bindscrolltolower="onReachBottom">
+                <view class="list" wx:if="{{listException.length > 0}}">
+                    <view
+                        class="order-card"
+                        wx:for="{{listException}}"
+                        wx:key="uniqueKey"
+                        data-type="{{item.type}}"
+                        data-id="{{item.id}}"
+                        bindtap="onCardTap"
+                    >
+                        <view class="order-card__head order-card__head--no-status">
+                            <text class="order-card__type order-card__type--form" wx:if="{{item.type === 'form'}}">固结报单</text>
+                            <text class="order-card__type order-card__type--sell" wx:else>行情报单</text>
+                        </view>
+                        <view class="order-card__divider"></view>
+                        <view class="order-card__body">
+                            <block wx:if="{{item.type === 'form'}}">
+                                <view class="order-card__row"><text class="order-card__label">下单方案</text><text class="order-card__value">{{item.schemeName}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">数量</text><text class="order-card__value">{{item.quantity || 1}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">快递单号</text><text class="order-card__value">{{item.expressNo || '—'}}</text></view>
+                                <view class="order-card__logistics" wx:if="{{item.logisticsSummary}}">
+                                    <text class="order-card__logistics-label">最新物流</text>
+                                    <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
+                                    <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                </view>
+                            </block>
+                            <block wx:else>
+                                <view class="order-card__row"><text class="order-card__label">商品明细</text><text class="order-card__value order-card__value--multi">{{item.productDetail}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">快递单号</text><text class="order-card__value">{{item.logisticsNo || '—'}}</text></view>
+                                <view class="order-card__row"><text class="order-card__label">是否寄存</text><text class="order-card__value">{{item.depositText}}</text></view>
+                                <view class="order-card__logistics" wx:if="{{item.logisticsSummary}}">
+                                    <text class="order-card__logistics-label">最新物流</text>
+                                    <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
+                                    <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                </view>
+                            </block>
+                            <view class="order-card__admin-note" wx:if="{{item.adminInternalNote}}">
+                                <text class="order-card__admin-note-label">管理员备注</text>
+                                <text class="order-card__admin-note-value">{{item.adminInternalNote}}</text>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+                <view class="empty" wx:elif="{{!loading}}">
+                    <text class="empty__icon">📋</text>
+                    <text class="empty__title">异常暂无订单</text>
+                </view>
+                <view class="loading-wrap" wx:if="{{loading && listException.length === 0}}">
+                    <text class="loading-wrap__text">加载中...</text>
+                </view>
+                <view class="nomore" wx:if="{{!hasMore_exception && listException.length > 0 && !loading}}">
+                    <text class="nomore__text">— 已加载全部 —</text>
+                </view>
+            </scroll-view>
+        </swiper-item>
+    </swiper>
+</view>

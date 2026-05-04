@@ -1,0 +1,131 @@
+<!--pages/payment-info/payment-info.wxml - 打款信息页-->
+<view class="container">
+    <view class="page-header">
+        <text class="page-title">打款信息</text>
+        <text class="page-subtitle">请填写真实有效的收款信息，以便及时结算</text>
+    </view>
+
+    <form bindsubmit="submitForm" bindreset="resetForm">
+        <!-- 真实姓名 -->
+        <view class="form-card">
+            <view class="form-item">
+                <view class="form-label">真实姓名 <text class="required">*</text></view>
+                <input
+                    class="form-input"
+                    name="realName"
+                    value="{{formData.realName}}"
+                    placeholder="请输入真实姓名"
+                    placeholder-class="form-input-placeholder"
+                    bindinput="onInputChange"
+                    data-field="realName"
+                />
+            </view>
+
+            <!-- 支付宝账号 -->
+            <view class="form-item">
+                <view class="form-label">支付宝账号 <text class="required">*</text></view>
+                <input
+                    class="form-input"
+                    name="alipayAccount"
+                    value="{{formData.alipayAccount}}"
+                    placeholder="请输入支付宝账号"
+                    placeholder-class="form-input-placeholder"
+                    bindinput="onInputChange"
+                    data-field="alipayAccount"
+                />
+            </view>
+
+            <!-- 银行卡号 -->
+            <view class="form-item">
+                <view class="form-label">银行卡号 <text class="required">*</text></view>
+                <input
+                    class="form-input"
+                    name="bankCardNumber"
+                    value="{{formData.bankCardNumber}}"
+                    placeholder="请输入银行卡号"
+                    placeholder-class="form-input-placeholder"
+                    bindinput="onInputChange"
+                    data-field="bankCardNumber"
+                />
+            </view>
+
+            <!-- 开户银行 -->
+            <view class="form-item">
+                <view class="form-label">开户银行 <text class="required">*</text></view>
+                <input
+                    class="form-input"
+                    name="bankName"
+                    value="{{formData.bankName}}"
+                    placeholder="如：中国工商银行"
+                    placeholder-class="form-input-placeholder"
+                    bindinput="onInputChange"
+                    data-field="bankName"
+                />
+            </view>
+
+            <!-- 开户支行 -->
+            <view class="form-item">
+                <view class="form-label">开户支行 <text class="required">*</text></view>
+                <input
+                    class="form-input"
+                    name="bankBranch"
+                    value="{{formData.bankBranch}}"
+                    placeholder="请输入开户支行"
+                    placeholder-class="form-input-placeholder"
+                    bindinput="onInputChange"
+                    data-field="bankBranch"
+                />
+            </view>
+        </view>
+
+        <!-- 微信收款码 -->
+        <view class="form-card">
+            <view class="form-item form-item-uploader">
+                <view class="form-label">微信收款码 <text class="required">*</text></view>
+                <view class="upload-section">
+                    <view class="upload-area" bindtap="chooseWechatQRCode" wx:if="{{!formData.wechatQRCode}}">
+                        <text class="upload-icon">+</text>
+                        <text class="upload-text">上传微信收款码</text>
+                    </view>
+                    <view class="preview-area" wx:else>
+                        <view class="preview-image-wrap">
+                            <image class="preview-image" src="{{formData.wechatQRCode}}" mode="aspectFit" show-menu-by-longpress="{{true}}"></image>
+                        </view>
+                        <view class="preview-actions">
+                            <text class="preview-btn" bindtap="chooseWechatQRCode">重新上传</text>
+                            <text class="preview-btn delete" bindtap="removeWechatQRCode">删除</text>
+                        </view>
+                    </view>
+                </view>
+            </view>
+        </view>
+
+        <!-- 支付宝收款码 -->
+        <view class="form-card">
+            <view class="form-item form-item-uploader">
+                <view class="form-label">支付宝收款码 <text class="required">*</text></view>
+                <view class="upload-section">
+                    <view class="upload-area" bindtap="chooseAlipayQRCode" wx:if="{{!formData.alipayQRCode}}">
+                        <text class="upload-icon">+</text>
+                        <text class="upload-text">上传支付宝收款码</text>
+                    </view>
+                    <view class="preview-area" wx:else>
+                        <view class="preview-image-wrap">
+                            <image class="preview-image" src="{{formData.alipayQRCode}}" mode="aspectFit" show-menu-by-longpress="{{true}}"></image>
+                        </view>
+                        <view class="preview-actions">
+                            <text class="preview-btn" bindtap="chooseAlipayQRCode">重新上传</text>
+                            <text class="preview-btn delete" bindtap="removeAlipayQRCode">删除</text>
+                        </view>
+                    </view>
+                </view>
+            </view>
+        </view>
+
+        <!-- 提交按钮 -->
+        <view class="btn-container">
+            <button class="reset-btn" form-type="reset">重置</button>
+            <button class="submit-btn" form-type="submit">保存</button>
+        </view>
+    </form>
+</view>

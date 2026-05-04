@@ -1,0 +1,17 @@
+---
+description: Element Plus 弹窗正文与标题区分割线的留白（管理端前端）
+globs: "**/*.vue"
+alwaysApply: false
+---
+
+# 弹窗（el-dialog）首项与顶部分割线留白
+
+## 问题
+
+仅依赖 Element Plus 默认的 `.el-dialog__body` 内边距时，**标题栏底部分割线**与**正文第一行**（多为表单项）容易视觉上贴在一起，缺少呼吸感。
+
+## 项目约定
+
+1. **全局**：已在 `src/styles/vab.scss` 的 `html body` 下为 `.el-dialog__body` 设置 `padding-top: 20px`（可与默认左右下边距共存）。新增业务弹窗**无需**再为「贴线」单独加首项 margin，除非设计有特殊需求。
+2. **例外**：若某弹窗需更大间距，可在该页用**更高优先级**或**带类名的选择器**覆写（如现有 `*.el-dialog .el-dialog__body { padding-top: 24px; }`），避免在表单单独叠 `padding-top` 与全局重复造成过大空白。
+3. **实现新弹窗时**：不要在表单项上依赖「负 margin」去抵消贴线；优先依赖全局 `el-dialog__body` 的 padding-top。

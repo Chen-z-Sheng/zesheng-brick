@@ -1,0 +1,206 @@
+<wxs module="sellBar">
+function trimStr(s) {
+  if (s == null || s === undefined) return '';
+  s = '' + s;
+  var i = 0;
+  var j = s.length - 1;
+  var c;
+  while (i <= j) {
+    c = s.charAt(i);
+    if (c === ' ' || c === '\n' || c === '\r' || c === '\t') i++;
+    else break;
+  }
+  while (j >= i) {
+    c = s.charAt(j);
+    if (c === ' ' || c === '\n' || c === '\r' || c === '\t') j--;
+    else break;
+  }
+  return s.substring(i, j + 1);
+}
+function hasNamedProduct(list) {
+  if (!list || list.length === 0) return false;
+  for (var i = 0; i < list.length; i++) {
+    var name = trimStr(list[i].name);
+    if (name.length > 0) return true;
+  }
+  return false;
+}
+module.exports.hasNamedProduct = hasNamedProduct;
+</wxs>
+<!-- 仅未登录时锁整页；下拉联想勿设 overflow:hidden，避免 scroll-view 子项点击失效 -->
+<page-meta page-style="{{needLogin ? 'overflow: hidden; height: 100%;' : ''}}" />
+<view class="page {{needLogin ? 'page-need-login' : ''}}" bindtap="onPageTapDismissDropdowns">
+  <view class="need-login-wrap" wx:if="{{needLogin}}">
+    <text class="need-login-text">登录后可填写</text>
+  </view>
+
+  <block wx:else>
+    <view class="form">
+      <!-- 商品信息 -->
+      <view class="cell-group cell-group-product">
+        <view class="cell-group-title">商品信息 <text class="required">*</text></view>
+        <view class="product-list">
+          <view class="product-item" wx:for="{{productList}}" wx:for-item="product" wx:for-index="productIndex" wx:key="productIndex">
+            <view class="product-item-info">
+              <view class="product-input-wrap" mark:dropdownArea="1">
+                <input
+                  class="product-name-input"
+                  placeholder="请输入商品名称"
+                  value="{{product.name}}"
+                  data-index="{{productIndex}}"
+                  bindinput="onProductNameInput"
+                  bindfocus="onProductNameFocus"
+                  bindblur="onProductNameBlur"
+                />
+                <scroll-view
+                  wx:if="{{showProductSuggest && activeProductIndex === productIndex && productSuggestList.length > 0}}"
+                  class="suggest-list suggest-list-scroll"
+                  scroll-y="true"
+                  bindtouchstart="onProductSuggestTouch"
+                >
+                  <view
+                    class="suggest-item"
+                    wx:for="{{productSuggestList}}"
+                    wx:for-item="suggestName"
+                    wx:key="*this"
+                    data-index="{{productIndex}}"
+                    data-value="{{suggestName}}"
+                    bindtouchstart="onDropdownOptionTouchStart"
+                    bindtouchmove="onDropdownOptionTouchMove"
+                    bindtouchend="onProductOptionTouchEnd"
+                  >{{suggestName}}</view>
+                </scroll-view>
+              </view>
+            </view>
+            <view class="product-item-actions">
+              <view class="stepper">
+                <view class="stepper-minus" bindtap="changeQuantity" data-index="{{productIndex}}" data-delta="-1">－</view>
+                <input class="stepper-num" type="number" value="{{product.quantity}}" data-index="{{productIndex}}" bindinput="onQuantityInput" />
+                <view class="stepper-plus" bindtap="changeQuantity" data-index="{{productIndex}}" data-delta="1">＋</view>
+              </view>
+              <view class="product-item-del" bindtap="removeProductItem" data-index="{{productIndex}}">删除</view>
+            </view>
+          </view>
+        </view>
+        <view class="product-add-wrap">
+          <view class="product-add-btn" bindtap="addProductItem">+ 新增商品</view>
+        </view>
+      </view>
+
+      <!-- 寄件人信息（必填）：无数据时点击直接弹新增；有数据时弹列表（可选、可删） -->
+      <view class="cell-group">
+        <view class="cell-group-title">寄件人信息 <text class="required">*</text></view>
+        <view class="cell cell-picker" bindtap="{{senderList.length === 0 ? 'openSenderModal' : 'openSenderListPopup'}}">
+          <text class="{{selectedSenderIndex > 0 ? 'picker-value' : 'picker-placeholder'}}">{{selectedSenderDisplay}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 寄件人列表弹窗（选择 / 删除） -->
+      <view class="sender-modal-mask" wx:if="{{showSenderListPopup}}" catchtap="closeSenderListPopup"></view>
+      <view class="sender-modal sender-list-modal" wx:if="{{showSenderListPopup}}">
+        <view class="sender-modal-title">选择寄件人</view>
+        <text class="sender-modal-subtitle">请选择常用寄件信息，提交后可继续编辑</text>
+        <view class="sender-list-body">
+          <view class="sender-list-item" wx:for="{{senderList}}" wx:key="index" data-index="{{index}}" bindtap="selectSenderByIndex">
+            <text class="sender-list-text">{{item.name}} {{item.phone}}</text>
+            <view class="sender-list-del" data-index="{{index}}" catchtap="onDeleteSenderTap">删除</view>
+          </view>
+        </view>
+        <view class="sender-modal-footer">
+          <view class="sender-modal-btn cancel" catchtap="closeSenderListPopup">取消</view>
+          <view class="sender-modal-btn confirm" catchtap="openSenderModal">新增寄件人</view>
+        </view>
+      </view>
+
+      <!-- 新增寄件人弹窗 -->
+      <view class="sender-modal-mask" wx:if="{{showSenderModal}}" catchtap="closeSenderModal"></view>
+      <view class="sender-modal" wx:if="{{showSenderModal}}">
+        <view class="sender-modal-title">新增寄件人</view>
+        <text class="sender-modal-subtitle">请填写真实姓名与手机号，便于快递联系</text>
+        <view class="sender-modal-body">
+          <view class="sender-modal-row">
+            <text class="sender-modal-label">寄件人姓名</text>
+            <input class="sender-modal-input" placeholder="请输入姓名" value="{{modalSenderName}}" bindinput="onModalSenderNameInput" />
+          </view>
+          <view class="sender-modal-row">
+            <text class="sender-modal-label">手机号</text>
+            <input class="sender-modal-input" type="number" placeholder="请输入手机号" value="{{modalSenderPhone}}" bindinput="onModalSenderPhoneInput" />
+          </view>
+        </view>
+        <view class="sender-modal-footer">
+          <view class="sender-modal-btn cancel" catchtap="closeSenderModal">取消</view>
+          <view class="sender-modal-btn confirm" catchtap="confirmAddSender">确定</view>
+        </view>
+      </view>
+
+      <!-- 物流公司（必填）：输入筛选，须从下方列表点选字典内名称 -->
+      <view class="cell-group logistics-group">
+        <view class="cell-group-title">物流公司 <text class="required">*</text></view>
+        <view class="cell cell-input-wrap logistics-input-wrap" mark:dropdownArea="1">
+          <input
+            class="cell-input"
+            placeholder="不能自定义物流公司"
+            value="{{logisticsFilter}}"
+            bindinput="onLogisticsInput"
+            bindfocus="onLogisticsFocus"
+            bindblur="onLogisticsBlur"
+          />
+          <scroll-view
+            wx:if="{{showLogisticsSuggest && logisticsSuggestList.length > 0}}"
+            class="suggest-list suggest-list-scroll"
+            scroll-y="true"
+            bindtouchstart="onLogisticsSuggestTouch"
+          >
+            <view
+              class="suggest-item"
+              wx:for="{{logisticsSuggestList}}"
+              wx:key="*this"
+              data-value="{{item}}"
+              bindtouchstart="onDropdownOptionTouchStart"
+              bindtouchmove="onDropdownOptionTouchMove"
+              bindtouchend="onLogisticsOptionTouchEnd"
+            >{{item}}</view>
+          </scroll-view>
+        </view>
+      </view>
+
+      <!-- 物流单号（必填） -->
+      <view class="cell-group">
+        <view class="cell-group-title">物流单号 <text class="required">*</text></view>
+        <view class="cell cell-input-wrap">
+          <input class="cell-input" placeholder="请填写物流单号" value="{{logisticsNo}}" bindinput="onLogisticsNoInput" />
+        </view>
+      </view>
+
+      <!-- 是否寄存（必填，默认否） -->
+      <view class="cell-group">
+        <view class="cell-group-title">是否寄存 <text class="required">*</text></view>
+        <picker mode="selector" range="{{storageOptions}}" value="{{storageIndex}}" bindchange="onStorageChange">
+          <view class="cell cell-picker">
+            <text class="{{storageIndex !== null ? 'picker-value' : 'picker-placeholder'}}">{{storageIndex !== null ? storageOptions[storageIndex] : '请选择'}}</text>
+            <text class="picker-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 备注（选填） -->
+      <view class="cell-group">
+        <view class="cell-group-title">备注</view>
+        <view class="cell cell-textarea-wrap">
+          <textarea
+            class="cell-textarea"
+            placeholder="需要备注这里填写,避免你我忘记"
+            placeholder-class="input-placeholder"
+            value="{{remark}}"
+            bindinput="onRemarkInput"
+          />
+        </view>
+      </view>
+    </view>
+
+    <view class="footer" wx:if="{{sellBar.hasNamedProduct(productList)}}">
+      <button class="footer-btn footer-submit" bindtap="submit">提交报单</button>
+    </view>
+  </block>
+</view>

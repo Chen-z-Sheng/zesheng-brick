@@ -1,0 +1,62 @@
+<view class="container">
+    <!-- 商品信息 -->
+    <view class="product-card">
+        <text class="product-title">{{productName}}</text>
+        <view class="price-row">
+            <text class="price-label">最高行情：</text>
+            <text class="price-value"><text class="price-unit">¥</text>{{price}}</text>
+        </view>
+        <text class="update-date">更新于 {{updateDate}}</text>
+    </view>
+
+    <!-- 规格选择 -->
+    <view class="spec-card" wx:if="{{specs.length > 0}}">
+        <view class="spec-group" wx:for="{{specs}}" wx:key="name">
+            <text class="spec-label">{{item.name}}</text>
+            <view class="spec-options">
+                <view
+                    class="spec-option {{selectedSpecs[item.name] === option ? 'selected' : ''}}"
+                    wx:for="{{item.options}}"
+                    wx:for-item="option"
+                    wx:key="*this"
+                    bindtap="selectSpec"
+                    data-type="{{item.name}}"
+                    data-value="{{option}}"
+                >{{option}}</view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 历史行情图表 -->
+    <view class="chart-card">
+        <view class="chart-header">
+            <text class="chart-title">历史行情</text>
+            <view class="chart-tabs">
+                <text class="chart-tab {{chartPeriod === 7 ? 'selected' : ''}}" bindtap="setChartPeriod" data-days="7">7天</text>
+                <text class="chart-tab {{chartPeriod === 30 ? 'selected' : ''}}" bindtap="setChartPeriod" data-days="30">30天</text>
+            </view>
+        </view>
+        <view class="chart-container">
+            <canvas type="2d" id="priceChart" class="price-chart"></canvas>
+        </view>
+        <view class="trend-prediction {{trendDirection}}" wx:if="{{trendDirection}}">
+            <text class="trend-text">预测趋势：{{trendDirection === 'up' ? '上涨' : '下跌'}}</text>
+            <text class="trend-icon">{{trendDirection === 'up' ? '↑' : '↓'}}</text>
+        </view>
+    </view>
+
+    <!-- 档口报价 -->
+    <view class="vendor-card" wx:if="{{vendors.length > 0}}">
+        <text class="vendor-title">档口报价</text>
+        <view class="vendor-item" wx:for="{{vendors}}" wx:key="id">
+            <text class="vendor-name">{{item.name}}</text>
+            <text class="vendor-price">¥{{item.price}}</text>
+        </view>
+    </view>
+
+    <!-- 底部操作栏 -->
+    <view class="bottom-bar" wx:if="{{specs.length > 0}}">
+        <button class="add-cart-btn" bindtap="addToCart">加入报单</button>
+        <button class="buy-btn" bindtap="buyNow">立即报单</button>
+    </view>
+</view>

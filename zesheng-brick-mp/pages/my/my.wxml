@@ -1,0 +1,159 @@
+<!--pages/my/my.wxml-->
+<view class="my-page">
+  <!-- 用户资料区：浅色顶栏 + 白卡片，登录/未登录统一层次 -->
+  <view class="profile-shell">
+    <view class="profile-card {{userInfo.userId || userInfo.id ? 'profile-card--logged' : 'profile-card--guest'}}">
+      <view class="profile-row" bindtap="onUserCardTap">
+        <view class="user-avatar-wrap">
+          <view class="avatar-ring">
+            <image class="user-avatar" src="{{avatarDisplayUrl}}" mode="aspectFill"></image>
+          </view>
+          <button
+            wx:if="{{userInfo.userId || userInfo.id}}"
+            class="avatar-change-btn"
+            open-type="chooseAvatar"
+            bindchooseavatar="onChooseAvatar"
+          ></button>
+        </view>
+        <view class="user-info-wrap">
+          <text class="profile-name">{{userInfo.nickName || userInfo.nickname || '点击登录'}}</text>
+          <text class="profile-meta" wx:if="{{userInfo.userId || userInfo.id}}">ID {{userInfo.userId || userInfo.id}}</text>
+          <text class="profile-meta profile-meta--guest" wx:else>登录后可同步订单、报单与打款信息</text>
+        </view>
+        <view class="profile-side">
+          <view class="profile-edit-pill" catchtap="navigateToProfile" wx:if="{{userInfo.userId || userInfo.id}}">
+            <text class="profile-edit-text">编辑</text>
+            <view class="profile-edit-arrow"></view>
+          </view>
+          <view class="profile-go-hint" wx:else>
+            <text class="profile-go-text">去登录</text>
+            <view class="profile-chevron"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单状态卡片 -->
+  <view class="order-stats-card" wx:if="{{userInfo.userId || userInfo.id}}">
+    <view class="order-stats-header">
+      <text class="order-stats-title">我的订单</text>
+      <view class="order-stats-all" bindtap="navigateToOrders" data-status="all">
+        <text class="order-stats-all-text">全部订单</text>
+        <view class="order-stats-arrow"></view>
+      </view>
+    </view>
+    <view class="order-stats-row">
+      <view class="order-stat-item" bindtap="navigateToOrders" data-status="transit">
+        <text class="order-stat-num">{{orderStats.transit || 0}}</text>
+        <text class="order-stat-label">运输中</text>
+      </view>
+      <view class="order-stat-divider"></view>
+      <view class="order-stat-item" bindtap="navigateToOrders" data-status="storing">
+        <text class="order-stat-num">{{orderStats.storing || 0}}</text>
+        <text class="order-stat-label">入库中</text>
+      </view>
+      <view class="order-stat-divider"></view>
+      <view class="order-stat-item" bindtap="navigateToOrders" data-status="completed">
+        <text class="order-stat-num">{{orderStats.completed || 0}}</text>
+        <text class="order-stat-label">已完成</text>
+      </view>
+      <view class="order-stat-divider"></view>
+      <view class="order-stat-item" bindtap="navigateToOrders" data-status="exception">
+        <text class="order-stat-num order-stat-num-warn">{{orderStats.exception || 0}}</text>
+        <text class="order-stat-label">异常</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能菜单列表 -->
+  <view class="menu-group">
+    <view class="menu-item" bindtap="navigateToPaymentInfo">
+      <view class="menu-item-icon-wrap menu-icon-green">
+        <text class="menu-item-icon">💰</text>
+      </view>
+      <view class="menu-item-body">
+        <text class="menu-item-title">打款信息</text>
+        <text class="menu-item-desc">{{paymentInfo || '未填写，点击设置'}}</text>
+      </view>
+      <view class="menu-item-arrow"></view>
+    </view>
+
+    <view class="menu-item" bindtap="onExpressEntryTap">
+      <view class="menu-item-icon-wrap menu-icon-orange">
+        <text class="menu-item-icon">📦</text>
+      </view>
+      <view class="menu-item-body">
+        <text class="menu-item-title">寄快递</text>
+        <text class="menu-item-desc">优惠寄件，安全可靠</text>
+      </view>
+      <view class="menu-item-arrow"></view>
+    </view>
+
+    <view class="menu-item" bindtap="showHelp">
+      <view class="menu-item-icon-wrap menu-icon-purple">
+        <text class="menu-item-icon">❓</text>
+      </view>
+      <view class="menu-item-body">
+        <text class="menu-item-title">帮助中心</text>
+        <text class="menu-item-desc">常见问题与使用指南</text>
+      </view>
+      <view class="menu-item-arrow"></view>
+    </view>
+
+    <view class="menu-item" bindtap="clearCache">
+      <view class="menu-item-icon-wrap menu-icon-gray">
+        <text class="menu-item-icon">🗑</text>
+      </view>
+      <view class="menu-item-body">
+        <text class="menu-item-title">清除缓存</text>
+        <text class="menu-item-desc">清除草稿等临时数据</text>
+      </view>
+      <view class="menu-item-arrow"></view>
+    </view>
+
+    <view class="menu-item menu-item-last" bindtap="navigateToAbout">
+      <view class="menu-item-icon-wrap menu-icon-blue">
+        <text class="menu-item-icon">ℹ️</text>
+      </view>
+      <view class="menu-item-body">
+        <text class="menu-item-title">关于</text>
+        <text class="menu-item-desc">应用介绍与版本信息</text>
+      </view>
+      <view class="menu-item-arrow"></view>
+    </view>
+  </view>
+
+  <!-- 退出登录 -->
+  <view class="logout-wrap" wx:if="{{userInfo.userId || userInfo.id}}">
+    <view class="logout-btn" bindtap="handleLogout">退出登录</view>
+  </view>
+
+  <!-- 寄快递说明弹窗 -->
+  <view class="modal-mask" wx:if="{{expressPromoteModalVisible}}" bindtap="closeExpressPromoteModal">
+    <view class="modal-card" catchtap="catchExpressModalEmpty">
+      <view class="modal-header">
+        <text class="modal-emoji">📦</text>
+        <text class="modal-title">寄快递提醒</text>
+        <view class="modal-close" bindtap="closeExpressPromoteModal">×</view>
+      </view>
+      <view class="modal-body">
+        <text class="modal-text">如果有京东学生号比较推荐用京东寄快递，8元起且安全。</text>
+        <text class="modal-tip">如暂无学生号，也可继续使用常规快递渠道。</text>
+      </view>
+      <view class="modal-footer">
+        <view class="modal-btn modal-btn-cancel" bindtap="closeExpressPromoteModal">我知道了</view>
+        <view class="modal-btn modal-btn-confirm" bindtap="onExpressPromGo">去寄快递</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 登录弹窗 -->
+  <login-modal
+    visible="{{loginModalVisible}}"
+    title="登录"
+    desc="登录后享受更多服务"
+    bind:close="handleLoginModalClose"
+    bind:success="handleLoginSuccess"
+  />
+</view>

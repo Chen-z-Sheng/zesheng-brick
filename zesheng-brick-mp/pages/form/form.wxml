@@ -1,0 +1,63 @@
+<!--pages/form/form.wxml-->
+<view class="form-page">
+  <!-- 报单方式选择 -->
+  <view class="options-wrap">
+    <view class="option-card option-normal" bindtap="navigateToForm" data-type="normal">
+      <view class="option-card-bg"></view>
+      <view class="option-card-content">
+        <view class="option-icon-wrap">
+          <text class="option-icon">📋</text>
+        </view>
+        <view class="option-text-wrap">
+          <text class="option-title">固结报单</text>
+          <text class="option-desc">没有行情的商品，按方案提交报单</text>
+        </view>
+        <view class="option-arrow">
+          <view class="option-arrow-icon"></view>
+        </view>
+      </view>
+    </view>
+
+    <view class="option-card option-market" bindtap="navigateToForm" data-type="market">
+      <view class="option-card-bg"></view>
+      <view class="option-card-content">
+        <view class="option-icon-wrap">
+          <text class="option-icon">📊</text>
+        </view>
+        <view class="option-text-wrap">
+          <text class="option-title">行情报单</text>
+          <text class="option-desc">按行情价格填写商品信息提交报单</text>
+        </view>
+        <view class="option-arrow">
+          <view class="option-arrow-icon"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 温馨提示 -->
+  <view class="tips-card">
+    <view class="tips-header">
+      <text class="tips-icon">💡</text>
+      <text class="tips-title">温馨提示</text>
+    </view>
+    <view class="tips-list">
+      <view class="tips-item">
+        <text class="tips-dot">·</text>
+        <text class="tips-text">不确定应该报哪个的可以直接联系管理员，首页有微信号</text>
+      </view>
+      <view class="tips-item">
+        <text class="tips-dot">·</text>
+        <text class="tips-text">固结报单：商品无行情时，选择对应方案并填写快递信息报单</text>
+      </view>
+      <view class="tips-item">
+        <text class="tips-dot">·</text>
+        <text class="tips-text">行情报单：有行情商品，填写商品名称和快递信息直接报单</text>
+      </view>
+      <view class="tips-item">
+        <text class="tips-dot">·</text>
+        <text class="tips-text">报单后可在「我的 → 订单」中查看进度</text>
+      </view>
+    </view>
+  </view>
+</view>

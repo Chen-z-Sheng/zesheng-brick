@@ -1,0 +1,402 @@
+/* pages/order-detail/order-detail.wxss */
+page {
+    background: #f7f7f7;
+}
+
+.page {
+    min-height: 100vh;
+    background: #f7f7f7;
+}
+
+.load-wrap,
+.error-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120rpx 32rpx;
+}
+
+.load-txt {
+    font-size: 28rpx;
+    color: #bbbbbb;
+}
+
+.error-txt {
+    font-size: 28rpx;
+    color: #ef4444;
+}
+
+.scroll {
+    height: 100vh;
+    padding: 20rpx 24rpx calc(48rpx + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+}
+
+/* ============================================
+   信息块
+   ============================================ */
+.block {
+    background: #ffffff;
+    border-radius: 16rpx;
+    padding: 0;
+    margin-bottom: 16rpx;
+    overflow: hidden;
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+/* 头部状态块 */
+.block.head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24rpx 28rpx;
+}
+
+/* 内容块 */
+.block-inner {
+    padding: 24rpx 28rpx;
+}
+
+.block-title {
+    font-size: 26rpx;
+    font-weight: 600;
+    color: #1a1a1a;
+    padding: 20rpx 28rpx 0;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 10rpx;
+}
+
+.block-title::before {
+    content: '';
+    display: inline-block;
+    width: 5rpx;
+    height: 26rpx;
+    background: #07c160;
+    border-radius: 3rpx;
+    flex-shrink: 0;
+}
+
+.block-divider {
+    height: 1rpx;
+    background: #f5f5f5;
+    margin: 16rpx 28rpx 0;
+}
+
+.block-content {
+    padding: 16rpx 28rpx 24rpx;
+}
+
+/* ============================================
+   类型标签
+   ============================================ */
+.tag {
+    font-size: 22rpx;
+    padding: 8rpx 20rpx;
+    border-radius: 24rpx;
+    font-weight: 500;
+}
+
+.tag-form {
+    background: rgba(7, 193, 96, 0.1);
+    color: #07c160;
+}
+
+.tag-sell {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.status {
+    font-size: 26rpx;
+    font-weight: 600;
+    color: #07c160;
+}
+
+/* ============================================
+   详情行
+   ============================================ */
+.row {
+    display: flex;
+    align-items: flex-start;
+    padding: 12rpx 0;
+    border-bottom: 1rpx solid #fafafa;
+    font-size: 26rpx;
+}
+
+.row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.label {
+    flex-shrink: 0;
+    width: 180rpx;
+    color: #999999;
+    line-height: 1.5;
+}
+
+.value {
+    flex: 1;
+    color: #333333;
+    word-break: break-all;
+    line-height: 1.5;
+}
+
+/* ============================================
+   图片区域
+   ============================================ */
+.imgs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16rpx;
+    padding-top: 8rpx;
+}
+
+.thumb {
+    width: 160rpx;
+    height: 160rpx;
+    border-radius: 10rpx;
+    background: #f5f5f5;
+}
+
+/* 结算凭证 */
+.proof-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16rpx;
+}
+
+.proof-img {
+    width: 100%;
+    border-radius: 10rpx;
+    background: #f5f5f5;
+}
+
+/* ============================================
+   商品明细
+   ============================================ */
+.item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16rpx 0;
+    border-bottom: 1rpx solid #fafafa;
+}
+
+.item:last-child {
+    border-bottom: none;
+}
+
+.item-name {
+    font-size: 28rpx;
+    color: #333333;
+    flex: 1;
+}
+
+.item-qty {
+    font-size: 26rpx;
+    color: #999999;
+    font-weight: 400;
+}
+
+/* ============================================
+   管理员备注
+   ============================================ */
+.admin-note-block {
+    margin-top: 16rpx;
+    padding: 16rpx 20rpx;
+    background: #fffbeb;
+    border-left: 4rpx solid #f59e0b;
+    border-radius: 10rpx;
+}
+
+.admin-note-block__label {
+    font-size: 22rpx;
+    font-weight: 600;
+    color: #d97706;
+    margin-bottom: 6rpx;
+    letter-spacing: 1rpx;
+    display: block;
+}
+
+.admin-note-block__value {
+    display: block;
+    font-size: 26rpx;
+    color: #333333;
+    line-height: 1.5;
+    word-break: break-all;
+}
+
+/* ============================================
+   物流轨迹
+   ============================================ */
+.logistics-placeholder {
+    font-size: 26rpx;
+    color: #bbbbbb;
+    padding: 16rpx 0;
+    display: block;
+}
+
+.logistics-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 16rpx;
+    border-bottom: 1rpx solid #f5f5f5;
+    margin-bottom: 16rpx;
+}
+
+.logistics-panel__title {
+    font-size: 26rpx;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.logistics-panel__toggle {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    padding: 8rpx 16rpx;
+    background: rgba(7, 193, 96, 0.08);
+    border-radius: 8rpx;
+}
+
+.logistics-panel__toggle-text {
+    font-size: 22rpx;
+    color: #07c160;
+}
+
+.logistics-panel__toggle-arrow {
+    font-size: 20rpx;
+    color: #07c160;
+}
+
+.logistics-card {
+    background: #f9fafb;
+    border-radius: 12rpx;
+    padding: 16rpx 18rpx;
+}
+
+.logistics-latest__text {
+    font-size: 26rpx;
+    color: #333333;
+    line-height: 1.6;
+    word-break: break-all;
+    display: block;
+}
+
+.logistics-latest--clamp .logistics-latest__text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+}
+
+.logistics-panel__hint {
+    margin-top: 10rpx;
+    font-size: 22rpx;
+    color: #bbbbbb;
+    line-height: 1.5;
+    display: block;
+}
+
+.logistics-err {
+    display: block;
+    font-size: 26rpx;
+    color: #ef4444;
+    line-height: 1.4;
+}
+
+/* ============================================
+   物流时间轴
+   ============================================ */
+.timeline {
+    padding-left: 0;
+}
+
+.timeline-item {
+    display: flex;
+    align-items: flex-start;
+    padding-bottom: 24rpx;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-item:last-child .timeline-line {
+    display: none;
+}
+
+.timeline-axis {
+    width: 32rpx;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.timeline-dot {
+    width: 14rpx;
+    height: 14rpx;
+    border-radius: 50%;
+    background: #07c160;
+    margin-top: 6rpx;
+    flex-shrink: 0;
+}
+
+.timeline-item:first-child .timeline-dot {
+    background: #07c160;
+    box-shadow: 0 0 0 4rpx rgba(7, 193, 96, 0.2);
+}
+
+.timeline-item:not(:first-child) .timeline-dot {
+    background: #dddddd;
+}
+
+.timeline-line {
+    width: 2rpx;
+    flex: 1;
+    min-height: 32rpx;
+    background: #e5e5e5;
+    margin-top: 6rpx;
+}
+
+.timeline-content {
+    flex: 1;
+    padding-left: 16rpx;
+}
+
+.timeline-time {
+    display: block;
+    font-size: 22rpx;
+    color: #bbbbbb;
+    margin-bottom: 6rpx;
+}
+
+.timeline-ctx {
+    display: block;
+    font-size: 26rpx;
+    color: #333333;
+    line-height: 1.5;
+    word-break: break-all;
+}
+
+/* ============================================
+   底部时间信息
+   ============================================ */
+.footer .row {
+    padding: 10rpx 0;
+}
+
+.footer .label {
+    color: #bbbbbb;
+    font-size: 24rpx;
+}
+
+.footer .value {
+    color: #999999;
+    font-size: 24rpx;
+}
