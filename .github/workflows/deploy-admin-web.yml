@@ -30,7 +30,7 @@ jobs:
               run: npm install -g pnpm
 
             - name: Install dependencies
-              run: pnpm install --no-skip-builds
+              run: pnpm approve-builds && pnpm install
 
             - name: Build project
               run: pnpm run build
