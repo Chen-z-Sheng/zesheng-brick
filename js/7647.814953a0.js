@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkzesheng_brick_admin_web=self.webpackChunkzesheng_brick_admin_web||[]).push([["7647"],{33714:function(e,n,t){t.r(n),t.d(n,{getUserPaymentInfoByUserId:function(){return u}});var r=t(74769);function u(e){return r.default.get(`/admin/user-payment-info/by-user/${e}`).then(e=>e.data)}}}]);

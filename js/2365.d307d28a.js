@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkzesheng_brick_admin_web=self.webpackChunkzesheng_brick_admin_web||[]).push([["2365"],{54012:function(e,n,t){t.r(n),t.d(n,{getList:function(){return r}});var u=t(74769);function r(){return(0,u.default)({url:"https://api.vuejs-core.cn/getAd",method:"get"})}}}]);

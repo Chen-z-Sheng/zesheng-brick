@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkzesheng_brick_admin_web=self.webpackChunkzesheng_brick_admin_web||[]).push([["7789"],{77612:function(e,n,t){t.r(n),t.d(n,{getIconList:function(){return u}});var i=t(74769);function u(e){return(0,i.default)({url:"/icon/list",method:"post",data:e})}}}]);

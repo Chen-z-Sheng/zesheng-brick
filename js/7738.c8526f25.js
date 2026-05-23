@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkzesheng_brick_admin_web=self.webpackChunkzesheng_brick_admin_web||[]).push([["7738"],{64929:function(e,n,t){t.r(n),t.d(n,{getTreeList:function(){return u}});var r=t(74769);function u(e){return(0,r.default)({url:"/tree/list",method:"post",data:e})}}}]);
