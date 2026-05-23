@@ -3,6 +3,12 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
+  onlyBuiltDependencies:
+    - '@parcel/watcher'
+    - core-js
+    - core-js-pure
+    - es5-ext
+    - vue-demi
 
 importers:
 

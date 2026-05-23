@@ -92,8 +92,18 @@
     "admin-template",
     "management-system"
   ],
+  "packageManager": "pnpm@10.6.5",
   "engines": {
     "node": ">=16.0.0",
     "npm": ">= 7.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "core-js",
+      "core-js-pure",
+      "es5-ext",
+      "vue-demi"
+    ]
   }
 }
