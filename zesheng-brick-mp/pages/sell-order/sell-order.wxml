@@ -168,8 +168,28 @@ module.exports.hasNamedProduct = hasNamedProduct;
       <!-- 物流单号（必填） -->
       <view class="cell-group">
         <view class="cell-group-title">物流单号 <text class="required">*</text></view>
-        <view class="cell cell-input-wrap">
-          <input class="cell-input" placeholder="请填写物流单号" value="{{logisticsNo}}" bindinput="onLogisticsNoInput" />
+        <view class="express-list">
+          <view class="express-item" wx:for="{{logisticsNoList}}" wx:for-index="expressIndex" wx:key="expressIndex">
+            <view class="express-item-main">
+              <text class="express-item-label">单号{{expressIndex + 1}}</text>
+              <input
+                class="express-item-input"
+                placeholder="请填写物流单号"
+                value="{{item.no}}"
+                data-index="{{expressIndex}}"
+                bindinput="onLogisticsNoInput"
+              />
+            </view>
+            <view
+              class="express-item-del"
+              wx:if="{{logisticsNoList.length > 1}}"
+              data-index="{{expressIndex}}"
+              bindtap="removeLogisticsNoItem"
+            >删除</view>
+          </view>
+        </view>
+        <view class="express-add-wrap">
+          <view class="express-add-btn" bindtap="addLogisticsNoItem">+ 添加快递单号</view>
         </view>
       </view>
 

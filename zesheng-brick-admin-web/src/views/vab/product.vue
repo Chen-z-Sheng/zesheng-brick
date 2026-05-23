@@ -143,17 +143,19 @@
         <el-dialog v-model="priceDialogVisible" :title="editPriceId ? '编辑行情' : '新增行情'" width="460px" destroy-on-close class="recycle-market-dialog" @close="resetPriceForm">
             <el-form ref="priceFormRef" :model="priceForm" :rules="priceRules" label-width="100px">
                 <el-form-item v-if="!editPriceId" label="三级分类" prop="level3Id">
-                    <el-select v-model="priceForm.level3Id" placeholder="请选择" style="width: 100%">
-                        <el-option-group v-for="l1 in level1List" :key="l1.id" :label="l1.name">
-                            <template v-for="l2 in (level2Map[l1.id] || [])">
-                                <el-option
-                                    v-for="l3 in (level3Map[l2.id] || [])"
-                                    :key="l3.id"
-                                    :label="`${l2.name} / ${l3.name}`"
-                                    :value="l3.id"
-                                />
-                            </template>
-                        </el-option-group>
+                    <el-select
+                        v-model="priceForm.level3Id"
+                        placeholder="请选择或输入关键字搜索"
+                        filterable
+                        clearable
+                        style="width: 100%"
+                    >
+                        <el-option
+                            v-for="item in priceLevel3Options"
+                            :key="item.id"
+                            :label="item.label"
+                            :value="item.id"
+                        />
                     </el-select>
                 </el-form-item>
                 <el-form-item v-if="!editPriceId" label="行情日期" prop="priceDate">
@@ -323,6 +325,22 @@ const filterLevel3Options = computed(() => {
         return level3ListForSelect.value.filter(item => item.level2Id === l2id)
     }
     return level3ListForSelect.value
+})
+
+/** 新增行情：扁平三级分类选项（含完整路径，便于 filterable 搜索） */
+const priceLevel3Options = computed(() => {
+    const options = []
+    level1List.value.forEach((l1) => {
+        (level2Map.value[l1.id] || []).forEach((l2) => {
+            (level3Map.value[l2.id] || []).forEach((l3) => {
+                options.push({
+                    id: l3.id,
+                    label: `${l1.name} / ${l2.name} / ${l3.name}`,
+                })
+            })
+        })
+    })
+    return options
 })
 
 const level2ListForSelect = ref([])
@@ -513,9 +531,10 @@ function openPriceDialog(row) {
             remark: row.remark || ''
         }
     } else {
+        const filteredLevel3Id = filterLevel3Id.value
         priceForm.value = {
-            level3Id: null,
-            priceDate: getYesterdayStr(),
+            level3Id: filteredLevel3Id != null && filteredLevel3Id !== '' ? filteredLevel3Id : null,
+            priceDate: filterPriceDate.value || getYesterdayStr(),
             recyclePrice: null,
             remark: ''
         }

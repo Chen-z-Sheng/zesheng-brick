@@ -1,61 +1,79 @@
 <view class="modal-container" wx:if="{{visible}}" bindtap="handleModalClose">
-    <view class="modal-content" catchtap="catchTap">
+    <view class="modal-sheet" catchtap="catchTap">
         <view class="modal-grabber"></view>
-        <view class="modal-header">
-            <view class="modal-title-wrap">
-                <text class="modal-title">{{title}}</text>
-                <text class="modal-desc">{{desc}}</text>
-            </view>
+
+        <view class="modal-head">
+            <text class="modal-title">{{title}}</text>
         </view>
 
-        <view class="login-panel">
-            <view class="brand-hero">
-                <view class="login-panel-title">欢迎登录泽晟搬砖助手</view>
-                <view class="login-panel-subtitle">登录后可查看订单、提交报单并同步个人数据</view>
+        <view class="login-actions">
+            <view class="phone-hint" wx:if="{{identityMode === 'donut' && phoneMask}}">
+                <text class="phone-hint-label">本机号码</text>
+                <text class="phone-hint-value">{{phoneMask}}</text>
             </view>
 
             <block wx:if="{{identityMode === 'donut'}}">
-                <view class="phone-mask-line">本机号码：{{phoneMask}}</view>
-                <view class="carrier-doc-row">
-                    <text class="carrier-link" catchtap="openCarrierDoc" data-which="cm">《中国移动认证条款》</text>
-                    <text class="carrier-split">·</text>
-                    <text class="carrier-link" catchtap="openCarrierDoc" data-which="cu">《联通统一认证条款》</text>
-                    <text class="carrier-split">·</text>
-                    <text class="carrier-link" catchtap="openCarrierDoc" data-which="ct">《天翼账号隐私协议》</text>
-                </view>
-                <checkbox-group class="agree-block" bindchange="onAgreeOperatorChange">
-                    <label class="agree-row">
-                        <checkbox value="agree" />
-                        <text class="agree-text">我已阅读并同意上述运营商条款，授权获取本机号码用于微信登录</text>
-                    </label>
-                </checkbox-group>
                 <button
-                    class="login-btn login-btn-primary"
+                    wx:if="{{!agreePlatform}}"
+                    class="action-btn"
+                    bindtap="onOneClickBlocked"
+                >
+                    本机号码一键登录
+                </button>
+                <button
+                    wx:else
+                    class="action-btn"
                     open-type="phoneOneClickLogin"
                     bindphoneoneclicklogin="onPhoneOneClick"
-                    disabled="{{loading || !agreeOperator || !nativeOneClickReady}}"
+                    disabled="{{loading || !nativeOneClickReady}}"
                     loading="{{loading}}"
                 >
-                    <text class="btn-text">微信登录</text>
+                    本机号码一键登录
                 </button>
             </block>
-
             <block wx:else>
                 <button
-                    class="login-btn login-btn-primary"
+                    wx:if="{{!agreePlatform}}"
+                    class="action-btn"
+                    bindtap="onQuickLoginBlocked"
+                >
+                    手机号快捷登录
+                </button>
+                <button
+                    wx:else
+                    class="action-btn"
                     open-type="getPhoneNumber"
                     bindgetphonenumber="onPhoneQuickLogin"
                     disabled="{{loading}}"
                     loading="{{loading}}"
                 >
-                    <text class="btn-text">微信登录</text>
+                    手机号快捷登录
                 </button>
             </block>
 
-            <button class="login-btn login-btn-secondary" bindtap="goSmsLogin" disabled="{{loading}}">
-                <text class="btn-text">手机号登录</text>
+            <button class="action-btn" bindtap="goSmsLogin" disabled="{{loading}}">
+                验证码登录
             </button>
-            <text class="footer-tip">登录即代表你同意平台相关服务协议与隐私政策</text>
+        </view>
+
+        <view class="agree-footer">
+            <checkbox-group class="agree-group" bindchange="onAgreePlatformChange">
+                <label class="agree-label">
+                    <view class="agree-checkbox-box">
+                        <checkbox class="agree-checkbox" value="agree" color="#07c160" />
+                    </view>
+                    <view class="agree-copy">
+                        <text class="agree-plain">我已阅读并同意</text>
+                        <text class="agree-link" catchtap="openPlatformDoc" data-which="user">《用户服务协议》</text>
+                        <text class="agree-plain">和</text>
+                        <text class="agree-link" catchtap="openPlatformDoc" data-which="privacy">《隐私政策》</text>
+                        <block wx:if="{{identityMode === 'donut'}}">
+                            <text class="agree-plain">及</text>
+                            <text class="agree-link" catchtap="openCarrierDoc" data-which="cm">运营商条款</text>
+                        </block>
+                    </view>
+                </label>
+            </checkbox-group>
         </view>
     </view>
 </view>

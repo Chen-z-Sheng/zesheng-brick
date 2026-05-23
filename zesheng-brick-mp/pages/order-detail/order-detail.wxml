@@ -20,6 +20,7 @@
                 <view class="block-content">
                     <view class="row"><text class="label">下单方案</text><text class="value">{{form.schemeName || '—'}}</text></view>
                     <view class="row"><text class="label">数量</text><text class="value">{{form.quantity != null ? form.quantity : '—'}}</text></view>
+                    <view class="row"><text class="label">快递单号</text><text class="value">{{expressNoDisplay || '—'}}</text></view>
                     <view class="row" wx:for="{{dataJsonLabels}}" wx:key="label">
                         <text class="label">{{item.label}}</text>
                         <text class="value">{{item.value}}</text>
@@ -58,7 +59,7 @@
                     <view class="row"><text class="label">寄件人</text><text class="value">{{sell.senderName || '—'}}</text></view>
                     <view class="row"><text class="label">寄件人电话</text><text class="value">{{sell.senderPhone || '—'}}</text></view>
                     <view class="row"><text class="label">物流公司</text><text class="value">{{sell.logisticsCompany || '—'}}</text></view>
-                    <view class="row"><text class="label">快递单号</text><text class="value">{{sell.logisticsNo || '—'}}</text></view>
+                    <view class="row"><text class="label">快递单号</text><text class="value">{{logisticsNoDisplay || '—'}}</text></view>
                     <view class="row"><text class="label">是否寄存</text><text class="value">{{depositText}}</text></view>
                     <view class="row" wx:if="{{sell.remark}}"><text class="label">备注</text><text class="value">{{sell.remark}}</text></view>
                     <view class="admin-note-block" wx:if="{{sell.adminInternalNote != null && sell.adminInternalNote !== ''}}">
@@ -85,44 +86,52 @@
             <view class="block-content">
                 <view class="logistics-panel__head">
                     <text class="logistics-panel__title">物流轨迹</text>
-                    <view
-                        class="logistics-panel__toggle"
-                        wx:if="{{logisticsTrace && logisticsTrace.success && logisticsTrace.traces && logisticsTrace.traces.length}}"
-                        catchtap="toggleLogisticsExpand"
-                    >
-                        <text class="logistics-panel__toggle-text">{{logisticsExpanded ? '收起' : '展开全部'}}</text>
-                        <text class="logistics-panel__toggle-arrow">{{logisticsExpanded ? '▲' : '▼'}}</text>
-                    </view>
                 </view>
 
                 <text wx:if="{{logisticsLoading}}" class="logistics-placeholder">正在查询物流信息…</text>
 
-                <block wx:elif="{{logisticsTrace}}">
-                    <view wx:if="{{logisticsTrace.success}}" class="logistics-card">
-                        <view
-                            class="logistics-latest {{ (!logisticsExpanded && logisticsTrace.traces && logisticsTrace.traces.length) ? 'logistics-latest--clamp' : '' }}"
-                            wx:if="{{ !(logisticsExpanded && logisticsTrace.traces && logisticsTrace.traces.length > 1) }}"
-                        >
-                            <text class="logistics-latest__text">{{logisticsTrace.lastTime ? logisticsTrace.lastTime + ' ' : ''}}{{logisticsTrace.lastInfo || logisticsTrace.stateText || '—'}}</text>
+                <text wx:elif="{{!logisticsLoading && (!logisticsTraceList || !logisticsTraceList.length)}}" class="logistics-placeholder">暂无物流信息</text>
+
+                <block wx:elif="{{logisticsTraceList && logisticsTraceList.length}}">
+                    <view class="logistics-multi-item" wx:for="{{logisticsTraceList}}" wx:for-index="traceIndex" wx:key="traceIndex">
+                        <view class="logistics-multi-head">
+                            <text class="logistics-multi-no">{{item.trackingNo || ('快递单号' + (traceIndex + 1))}}</text>
+                            <view
+                                class="logistics-panel__toggle"
+                                wx:if="{{item.success && item.traces && item.traces.length}}"
+                                catchtap="toggleLogisticsExpand"
+                                data-index="{{traceIndex}}"
+                            >
+                                <text class="logistics-panel__toggle-text">{{logisticsExpandedMap[traceIndex] ? '收起' : '展开全部'}}</text>
+                                <text class="logistics-panel__toggle-arrow">{{logisticsExpandedMap[traceIndex] ? '▲' : '▼'}}</text>
+                            </view>
                         </view>
-                        <text
-                            class="logistics-panel__hint"
-                            wx:if="{{!logisticsExpanded && logisticsTrace.traces && logisticsTrace.traces.length > 1}}"
-                        >共 {{logisticsTrace.traces.length}} 条记录，点击「展开全部」查看</text>
-                        <view class="timeline" wx:if="{{logisticsExpanded && logisticsTrace.traces && logisticsTrace.traces.length > 1}}">
-                            <view class="timeline-item" wx:for="{{logisticsTrace.traces}}" wx:key="index">
-                                <view class="timeline-axis">
-                                    <view class="timeline-dot"></view>
-                                    <view class="timeline-line"></view>
-                                </view>
-                                <view class="timeline-content">
-                                    <text class="timeline-time">{{item.time}}</text>
-                                    <text class="timeline-ctx">{{item.context}}</text>
+                        <view wx:if="{{item.success}}" class="logistics-card">
+                            <view
+                                class="logistics-latest {{ (!logisticsExpandedMap[traceIndex] && item.traces && item.traces.length) ? 'logistics-latest--clamp' : '' }}"
+                                wx:if="{{ !(logisticsExpandedMap[traceIndex] && item.traces && item.traces.length > 1) }}"
+                            >
+                                <text class="logistics-latest__text">{{item.lastTime ? item.lastTime + ' ' : ''}}{{item.lastInfo || item.stateText || '—'}}</text>
+                            </view>
+                            <text
+                                class="logistics-panel__hint"
+                                wx:if="{{!logisticsExpandedMap[traceIndex] && item.traces && item.traces.length > 1}}"
+                            >共 {{item.traces.length}} 条记录，点击「展开全部」查看</text>
+                            <view class="timeline" wx:if="{{logisticsExpandedMap[traceIndex] && item.traces && item.traces.length > 1}}">
+                                <view class="timeline-item" wx:for="{{item.traces}}" wx:for-item="traceItem" wx:key="index">
+                                    <view class="timeline-axis">
+                                        <view class="timeline-dot"></view>
+                                        <view class="timeline-line"></view>
+                                    </view>
+                                    <view class="timeline-content">
+                                        <text class="timeline-time">{{traceItem.time}}</text>
+                                        <text class="timeline-ctx">{{traceItem.context}}</text>
+                                    </view>
                                 </view>
                             </view>
                         </view>
+                        <text wx:else class="logistics-err">{{item.errorMessage || '查询失败'}}</text>
                     </view>
-                    <text wx:else class="logistics-err">{{logisticsTrace.errorMessage}}</text>
                 </block>
             </view>
         </view>

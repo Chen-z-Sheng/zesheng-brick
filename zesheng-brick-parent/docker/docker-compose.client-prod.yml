@@ -1,0 +1,27 @@
+# C 端（prod，端口 9067）；需先启动 admin-prod，且同在 zesheng-net
+# 启动：docker compose --env-file .env.docker.prod -f docker-compose.client-prod.yml up -d
+
+services:
+  zesheng-client:
+    image: zesheng-client:0.0.1-SNAPSHOT
+    container_name: zesheng-prod-client
+    env_file:
+      - .env.docker.prod
+    ports:
+      - "9067:9067"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      TZ: Asia/Shanghai
+      DB_URL: jdbc:mysql://zesheng-prod-mysql:3306/zesheng_brick?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      REDIS_HOST: zesheng-prod-redis
+      REDIS_PORT: "6379"
+      REDIS_DATABASE: "0"
+      ZESHENG_ADMIN_API_BASE: http://zesheng-prod-admin:9068/api/admin
+    networks:
+      - zesheng-net
+
+networks:
+  zesheng-net:
+    external: true

@@ -17,6 +17,7 @@ import com.zesheng.admin.model.request.FormSubmissionPageRequest;
 import com.zesheng.admin.model.request.FormSubmissionUpdateRequest;
 import com.zesheng.admin.service.IFormSubmissionService;
 import com.zesheng.common.response.R;
+import com.zesheng.common.util.ExpressNoSupport;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -235,7 +237,10 @@ public class FormSubmissionServiceImpl implements IFormSubmissionService {
             entity.setAdminInternalNote(request.getAdminInternalNote());
         }
         if (request.getDataJson() != null) {
-            entity.setDataJson(request.getDataJson());
+            Map<String, Object> dataJson = request.getDataJson();
+            List<String> expressNos = ExpressNoSupport.readExpressNosFromFormJson(dataJson);
+            ExpressNoSupport.writeExpressNosToFormJson(dataJson, expressNos);
+            entity.setDataJson(dataJson);
         }
         formSubmissionMapper.updateById(entity);
         return R.success(getById(id));

@@ -1,0 +1,6 @@
+# 镜像构建请以 docker/ 为上下文（执行 docker/build-and-save.ps1 或 .sh 即可）
+# 若在 parent 根目录误执行 docker build，至少排除 target/src 以控制体积
+.git
+.idea
+**/target
+**/src

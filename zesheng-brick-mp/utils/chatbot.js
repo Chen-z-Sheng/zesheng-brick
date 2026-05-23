@@ -1,4 +1,5 @@
 const request = require('./request');
+const logger = require('./logger');
 const { getOpenId, setOpenId, getUserInfo } = require('./storage');
 
 let initPromise = null;
@@ -94,11 +95,6 @@ async function ensureOpenId() {
     return openId;
 }
 
-/** 离开客服页后需再次 init 时调用 */
-function resetChatbotInit() {
-    initPromise = null;
-}
-
 /**
  * 获取系统布局信息
  * 包括状态栏、导航栏、安全区域等高度
@@ -153,51 +149,43 @@ function getSystemLayoutInfo() {
  */
 function calcOperateCardHeight() {
     const layoutInfo = getSystemLayoutInfo();
-    // 基础输入框高度约 56px，加上安全区域
     return Math.round(56 + layoutInfo.safeAreaBottom);
+}
+
+function resetChatbotInit() {
+    initPromise = null;
 }
 
 function initChatbot(options = {}) {
     if (options.forceReinit === true) {
         initPromise = null;
     }
-    if (initPromise) return initPromise;
+    if (initPromise) {
+        return initPromise;
+    }
 
     initPromise = ensureOpenId().then((openId) => {
-        if (!isValidOpenId(openId)) {
-            throw new Error('无法获取有效用户身份，请检查登录状态');
-        }
-
-        const plugin = requirePlugin('myPlugin');
+        const plugin = requirePlugin('chatbot');
         const isAnonymous = options.anonymous === true;
         const userName = isAnonymous ? DEFAULT_USER_NAME : (toSafeString(options.userName) || DEFAULT_USER_NAME);
         const userHeader = isAnonymous ? DEFAULT_USER_AVATAR : (toSafeString(options.userHeader) || DEFAULT_USER_AVATAR);
-
-        // 获取系统布局信息
         const layoutInfo = getSystemLayoutInfo();
         const operateCardHeight = calcOperateCardHeight();
 
-        console.log('[chatbot] 布局信息:', JSON.stringify(layoutInfo));
-        console.log('[chatbot] operateCardHeight:', operateCardHeight);
+        logger.log('[chatbot] 布局信息:', JSON.stringify(layoutInfo));
+        logger.log('[chatbot] operateCardHeight:', operateCardHeight);
 
         return new Promise((resolve, reject) => {
-            const initPayload = {
+            plugin.init({
                 appid: options.appid || 'shVdhiau7vzPNreYOhccE63qaDhxLM',
                 openid: openId,
                 userHeader,
                 userName,
                 anonymous: isAnonymous,
-                // 历史消息记录 - 确保图片消息能保存
                 history: true,
                 historySize: 200,
-                // 底部操作栏高度
-                operateCardHeight: operateCardHeight,
-                // 导航栏高度
+                operateCardHeight,
                 navHeight: layoutInfo.navBarHeight,
-            };
-
-            plugin.init({
-                ...initPayload,
                 success: () => resolve(openId),
                 fail: (err) => reject(err),
             });
@@ -211,9 +199,9 @@ function initChatbot(options = {}) {
 }
 
 module.exports = {
-    initChatbot,
     ensureOpenId,
-    resetChatbotInit,
     getSystemLayoutInfo,
     calcOperateCardHeight,
+    initChatbot,
+    resetChatbotInit,
 };

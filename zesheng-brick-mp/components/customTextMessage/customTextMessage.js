@@ -1,4 +1,4 @@
-var plugin = requirePlugin("myPlugin");
+const plugin = requirePlugin('chatbot');
 Component({
   properties: {
     msg: Object

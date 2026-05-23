@@ -1,3 +1,11 @@
+const { applyPageShare } = require('./utils/page-share');
+
+const originalPage = Page;
+Page = function pageWithShare(options) {
+    applyPageShare(options);
+    return originalPage(options);
+};
+
 const { getCurrentUser } = require('./services/auth');
 const { syncUserInfo, getCachedLoginState, setGlobalUserInfo } = require('./services/auth-state');
 const { getToken } = require('./utils/storage');
@@ -11,10 +19,7 @@ App({
     },
 
     onLaunch() {
-        // 设置 CSS 变量 - 状态栏高度（适配刘海屏）
         this.setStatusBarHeight();
-
-        // 小程序启动时检查登录状态
         this.checkLoginStatus();
     },
 

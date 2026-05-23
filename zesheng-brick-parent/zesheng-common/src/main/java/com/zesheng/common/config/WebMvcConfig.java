@@ -51,12 +51,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/auth/logout",
                         // 帮助中心FAQ（公开接口，无需登录）
                         "/help-faq/**",
+                        // 公开系统配置（白名单 key，与 C 端 Security permitAll 一致；不经 AuthInterceptor）
+                        "/public/sys-config/**",
                         // 首页轮播图（公开接口，无需登录）
                         "/banner/**",
                         // 物流公司名称联想（参考数据，C 端 permitAll）
                         "/logistics-company/**",
                         // 小程序端回收行情（C 端 Security 已 permitAll；无 Token 时不经 Redis 校验）
                         "/recycle-market/**",
+                        // 公告历史（首页滚动条、历史页；C 端 Security 已 permitAll）
+                        "/announcements/**",
                         // 管理端行情开放查询（供 C 端 RestTemplate 内网调用，无管理端 Bearer）
                         "/pub/recycle-market/**",
                         // 文档相关

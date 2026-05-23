@@ -619,3 +619,66 @@ page {
 .footer-submit:active {
   background: #06ad56;
 }
+
+/* 快递单号列表 */
+.express-list {
+  padding: 0 24rpx;
+}
+
+.express-item {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.express-item:last-child {
+  border-bottom: none;
+}
+
+.express-item-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.express-item-label {
+  display: block;
+  font-size: 24rpx;
+  color: #999999;
+  margin-bottom: 8rpx;
+}
+
+.express-item-input {
+  width: 100%;
+  height: 72rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  color: #1a1a1a;
+  background: #f7f7f7;
+  border-radius: 10rpx;
+  box-sizing: border-box;
+}
+
+.express-item-del {
+  flex-shrink: 0;
+  font-size: 26rpx;
+  color: #fa5151;
+  padding: 8rpx 0 8rpx 8rpx;
+}
+
+.express-add-wrap {
+  padding: 8rpx 24rpx 20rpx;
+}
+
+.express-add-btn {
+  height: 72rpx;
+  border-radius: 10rpx;
+  border: 1rpx dashed #07c160;
+  color: #07c160;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 193, 96, 0.04);
+}

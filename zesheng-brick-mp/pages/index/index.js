@@ -1,12 +1,22 @@
 const configService = require('../../services/config');
 const announcementService = require('../../services/announcement');
 const { getToken } = require('../../utils/storage');
+const {
+    buildShareAppMessagePayload,
+    buildShareTimelinePayload,
+    showShareMenuForPage,
+} = require('../../utils/page-share');
 const app = getApp();
+
+/** 商务合作联系方式：接口失败或未配置时的兜底 */
+const BUSINESS_CONTACT_FALLBACK = '18984533503';
 
 Page({
   data: {
     needScroll: false,
     contact: '',
+    /** 商务合作微信号（sys_config：business_wechat_account） */
+    businessContact: '',
     bannerList: [],
     announcementText: '欢迎使用泽晟搬砖助手！',
     announcementScrollSpeed: 8,
@@ -15,20 +25,27 @@ Page({
     announcementPopup: null
   },
 
+  onShareAppMessage() {
+    return buildShareAppMessagePayload(this);
+  },
+
+  onShareTimeline() {
+    return buildShareTimelinePayload(this);
+  },
+
   onLoad() {
+    showShareMenuForPage(this);
     this.loadBannerList();
-    this.loadAnnouncementBanner();
-    if (getToken()) {
-      this.loadAdminWechatContact();
-    }
+    // 公开 sys_config，后端 permitAll；未登录也应展示后台配置的联系方式
+    this.loadAdminWechatContact();
+    this.loadBusinessWechatContact();
   },
 
   onShow() {
+    showShareMenuForPage(this);
     this.loadAnnouncementBanner();
     this.fetchAnnouncementPopup();
-    if (getToken()) {
-      this.loadAdminWechatContact();
-    }
+    // 联系方式已通过 onLoad 加载，无需重复请求
   },
 
   /** 首页客服微信号（sys_config：admin_wechat_account） */
@@ -40,6 +57,18 @@ Page({
       })
       .catch(() => {
         this.setData({ contact: '' });
+      });
+  },
+
+  /** 首页商务合作联系方式（sys_config：business_wechat_account） */
+  loadBusinessWechatContact() {
+    configService.fetchPublicSysConfigByKey(configService.BUSINESS_WECHAT_ACCOUNT_KEY)
+      .then((value) => {
+        const text = value != null ? String(value).trim() : '';
+        this.setData({ businessContact: text || BUSINESS_CONTACT_FALLBACK });
+      })
+      .catch(() => {
+        this.setData({ businessContact: BUSINESS_CONTACT_FALLBACK });
       });
   },
 
@@ -94,6 +123,7 @@ Page({
    * 登录完成后若停留在首页，补拉公告（未登录时不会把「已检查」锁死）
    */
   onLoginSuccess() {
+    this.loadAnnouncementBanner();
     this.fetchAnnouncementPopup();
   },
 
@@ -219,7 +249,8 @@ Page({
    * 点击复制联系方式
    */
   copyContact(e) {
-    const contact = e?.currentTarget?.dataset?.contact || this.data.contact || '';
+    const raw = e?.currentTarget?.dataset?.contact;
+    const contact = raw != null ? String(raw).trim() : '';
     if (!contact) {
       wx.showToast({ title: '联系方式缺失', icon: 'none' });
       return;
@@ -233,5 +264,12 @@ Page({
         wx.showToast({ title: '复制失败', icon: 'none' });
       }
     });
+  },
+
+  /**
+   * 图片加载失败时隐藏轮播图区域
+   */
+  onImageError() {
+    this.setData({ bannerList: [] });
   }
 })

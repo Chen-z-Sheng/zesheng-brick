@@ -1,5 +1,10 @@
 const logger = require('../../utils/logger');
 const { getCategories, getProducts, getPriceHistory } = require('../../services/recycle-market');
+const {
+    buildShareAppMessagePayload,
+    buildShareTimelinePayload,
+    showShareMenuForPage,
+} = require('../../utils/page-share');
 
 function normalizeCategoryTree(list) {
     if (!Array.isArray(list)) return [];
@@ -224,7 +229,8 @@ function convertHistoryList(historyList) {
 
 Page({
     data: {
-        loading: false,
+        pageLoading: false,
+        productsLoading: false,
         errorMessage: '',
         level1Categories: [],
         activeLevel1Id: null,
@@ -243,17 +249,29 @@ Page({
         level3CanScroll: false,
     },
 
+    onShareAppMessage() {
+        return buildShareAppMessagePayload(this);
+    },
+
+    onShareTimeline() {
+        return buildShareTimelinePayload(this);
+    },
+
     onLoad() {
+        showShareMenuForPage(this);
         this._level2ProductMap = {};
         this._globalIndexLoadingPromise = null;
         this._globalSearchReady = false;
         this._level2ToLevel1Map = {};
         this._globalSearchMode = false;
+        this._searchDebounceTimer = null;
+        this._level2ScrollTop = 0;
         this.syncKeyword('');
         this.initializePage();
     },
 
     onShow() {
+        showShareMenuForPage(this);
         this.syncKeyword(this.data.keyword);
     },
 
@@ -265,14 +283,14 @@ Page({
 
     async initializePage() {
         this.setData({
-            loading: true,
+            pageLoading: true,
             errorMessage: '',
         });
         try {
             const categories = await this.loadCategories();
             if (!categories.length) {
                 this.setData({
-                    loading: false,
+                    pageLoading: false,
                     errorMessage: '暂无可用分类',
                     thirdCategoryProducts: [],
                     filteredThirdProducts: [],
@@ -293,7 +311,7 @@ Page({
                 await this.loadProductsByLevel2(firstLevel2.id);
             } else {
                 this.setData({
-                    loading: false,
+                    pageLoading: false,
                     thirdCategoryProducts: [],
                     filteredThirdProducts: [],
                 });
@@ -302,7 +320,7 @@ Page({
         } catch (error) {
             logger.error('初始化行情页失败', error);
             this.setData({
-                loading: false,
+                pageLoading: false,
                 errorMessage: '行情加载失败，请稍后重试',
             });
         }
@@ -344,7 +362,8 @@ Page({
             if (cached) {
                 this.setData({
                     thirdCategoryProducts: cached,
-                    loading: false,
+                    pageLoading: false,
+                    productsLoading: false,
                     errorMessage: '',
                 });
                 this.applyKeywordFilter(this.data.keyword);
@@ -353,7 +372,8 @@ Page({
             }
         }
         this.setData({
-            loading: true,
+            pageLoading: false,
+            productsLoading: true,
             errorMessage: '',
         });
         try {
@@ -362,7 +382,7 @@ Page({
             this.setLevel2ProductsToCache(level2Id, products);
             this.setData({
                 thirdCategoryProducts: products,
-                loading: false,
+                productsLoading: false,
             });
             this.applyKeywordFilter(this.data.keyword);
             this.scheduleMeasureLevel3Scrollbar();
@@ -371,11 +391,27 @@ Page({
             this.setData({
                 thirdCategoryProducts: [],
                 filteredThirdProducts: [],
-                loading: false,
+                productsLoading: false,
                 errorMessage: '查询行情失败，请稍后重试',
                 level3CanScroll: false,
             });
         }
+    },
+
+    /**
+     * 分批预加载商品数据，避免一次性发起过多请求
+     * @param {Array} tasks - 预加载任务数组
+     * @param {number} batchSize - 每批数量，默认3
+     */
+    async preloadWithBatching(tasks, batchSize = 3) {
+        const results = [];
+        for (let i = 0; i < tasks.length; i += batchSize) {
+            const batch = tasks.slice(i, i + batchSize);
+            // eslint-disable-next-line no-await-in-loop
+            const batchResults = await Promise.all(batch);
+            results.push(...batchResults);
+        }
+        return results;
     },
 
     async preloadGlobalProductIndex() {
@@ -388,8 +424,10 @@ Page({
         const categories = this.data.level1Categories || [];
         // 预加载所有二级分类商品，支持全局搜索自动定位
         const tasks = [];
-        categories.forEach((level1) => {
-            (level1.children || []).forEach((level2) => {
+        // 只预加载前10个分类，避免过多请求
+        const limitedCategories = categories.slice(0, 10);
+        limitedCategories.forEach((level1) => {
+            (level1.children || []).slice(0, 5).forEach((level2) => {
                 const level2Id = level2.id;
                 if (level2Id == null || this.getLevel2ProductsFromCache(level2Id)) {
                     return;
@@ -411,13 +449,14 @@ Page({
                 );
             });
         });
-        this._globalIndexLoadingPromise = Promise.all(tasks)
-            .then(() => {
-                this._globalSearchReady = true;
-            })
-            .finally(() => {
-                this._globalIndexLoadingPromise = null;
-            });
+
+        this._globalIndexLoadingPromise = (async () => {
+            // 分批执行，每批3个请求
+            await this.preloadWithBatching(tasks, 3);
+            this._globalSearchReady = true;
+        })().finally(() => {
+            this._globalIndexLoadingPromise = null;
+        });
         return this._globalIndexLoadingPromise;
     },
 
@@ -468,14 +507,103 @@ Page({
             activeLevel2Id: firstLevel2 ? firstLevel2.id : null,
         });
         this._globalSearchMode = false;
+        this.resetLevel2Scroll();
         if (firstLevel2 && firstLevel2.id != null) {
             this.loadProductsByLevel2(firstLevel2.id);
             return;
         }
         this.setData({
-            loading: false,
+            pageLoading: false,
+            productsLoading: false,
             thirdCategoryProducts: [],
             filteredThirdProducts: [],
+        });
+    },
+
+    getLevel2ScrollNode(callback) {
+        wx.createSelectorQuery()
+            .in(this)
+            .select('.level2-column')
+            .node()
+            .exec((res) => {
+                const node = res && res[0] ? res[0].node : null;
+                callback(node);
+            });
+    },
+
+    scrollLevel2To(top, animated) {
+        const targetTop = Math.max(0, Number(top) || 0);
+        this._level2ScrollTop = targetTop;
+        this.getLevel2ScrollNode((node) => {
+            if (!node || typeof node.scrollTo !== 'function') {
+                return;
+            }
+            node.scrollTo({
+                top: targetTop,
+                animated: animated !== false,
+            });
+        });
+    },
+
+    resetLevel2Scroll() {
+        this.scrollLevel2To(0, false);
+    },
+
+    onLevel2Scroll(event) {
+        const scrollTop = event && event.detail ? event.detail.scrollTop : 0;
+        this._level2ScrollTop = Number(scrollTop) || 0;
+    },
+
+    /**
+     * 仅当选中项被遮挡时做最小位移，上下留空隙；已在可视区内则不滚动
+     */
+    ensureLevel2Visible(level2Id) {
+        if (level2Id == null) {
+            return;
+        }
+        const query = wx.createSelectorQuery().in(this);
+        query.select('.level2-column').fields({ size: true, scrollOffset: true });
+        query.select('.level2-inner').boundingClientRect();
+        query.select('#level2-' + level2Id).boundingClientRect();
+        query.exec((res) => {
+            const column = res && res[0];
+            const inner = res && res[1];
+            const item = res && res[2];
+            if (!column || !inner || !item || !column.height) {
+                return;
+            }
+
+            const containerHeight = column.height;
+            const currentScrollTop = Number(column.scrollTop);
+            const scrollTop = Number.isFinite(currentScrollTop)
+                ? currentScrollTop
+                : (this._level2ScrollTop || 0);
+            const itemTop = item.top - inner.top;
+            const itemHeight = item.height;
+            const itemBottom = itemTop + itemHeight;
+            const innerHeight = inner.height || 0;
+            const maxScrollTop = Math.max(0, innerHeight - containerHeight);
+
+            const windowInfo = wx.getWindowInfo();
+            const edgeGap = Math.round((windowInfo.windowWidth / 750) * 48);
+            const viewTop = scrollTop + edgeGap;
+            const viewBottom = scrollTop + containerHeight - edgeGap;
+
+            let targetScrollTop = scrollTop;
+            if (itemTop < viewTop) {
+                targetScrollTop = Math.max(0, itemTop - edgeGap);
+            } else if (itemBottom > viewBottom) {
+                targetScrollTop = itemBottom - containerHeight + edgeGap;
+            } else {
+                return;
+            }
+
+            targetScrollTop = Math.min(Math.max(0, targetScrollTop), maxScrollTop);
+            if (Math.abs(targetScrollTop - scrollTop) < 1) {
+                return;
+            }
+
+            this.scrollLevel2To(targetScrollTop, true);
         });
     },
 
@@ -484,9 +612,7 @@ Page({
         if (level2Id == null || String(level2Id) === String(this.data.activeLevel2Id)) {
             return;
         }
-        this.setData({
-            activeLevel2Id: level2Id,
-        });
+        this.setData({ activeLevel2Id: level2Id });
         this._globalSearchMode = false;
         this.loadProductsByLevel2(level2Id);
     },
@@ -501,8 +627,17 @@ Page({
     },
 
     onKeywordInput(event) {
-        const keyword = this.syncKeyword(event && event.detail ? event.detail.value : '');
-        this.handleKeywordInputChange(keyword);
+        const rawKeyword = event && event.detail ? event.detail.value : '';
+        this.syncKeyword(rawKeyword);
+
+        // 防抖：300ms 后再执行搜索
+        if (this._searchDebounceTimer) {
+            clearTimeout(this._searchDebounceTimer);
+        }
+        this._searchDebounceTimer = setTimeout(() => {
+            const keyword = this.data.keyword;
+            this.handleKeywordInputChange(keyword);
+        }, 300);
     },
 
     async handleKeywordInputChange(keyword) {
@@ -525,6 +660,8 @@ Page({
             activeLevel1Id: matched.level1Id,
             level2Categories,
             activeLevel2Id: matched.level2Id,
+        }, () => {
+            this.ensureLevel2Visible(matched.level2Id);
         });
         this._globalSearchMode = true;
 
@@ -555,7 +692,7 @@ Page({
         this._measureScrollbarTimer = setTimeout(() => {
             this._measureScrollbarTimer = null;
             this.measureLevel3Scrollbar();
-        }, 60);
+        }, 100);
     },
 
     measureLevel3Scrollbar() {
@@ -641,9 +778,12 @@ Page({
                 ctx.scale(dpr, dpr);
                 ctx.clearRect(0, 0, width, height);
 
-                const prices = historyList.map((item) => item.price);
-                const maxPrice = Math.max.apply(null, prices);
-                const minPrice = Math.min.apply(null, prices);
+                const prices = historyList.map((item) => item.price).filter((p) => p !== null && p !== undefined && Number.isFinite(p));
+                if (prices.length === 0) {
+                    return;
+                }
+                const maxPrice = Math.max(...prices);
+                const minPrice = Math.min(...prices);
                 const range = maxPrice - minPrice || 1;
 
                 const paddingLeft = 56;
@@ -664,7 +804,8 @@ Page({
                 if (historyList.length >= 2) {
                     ctx.beginPath();
                     ctx.lineWidth = 2;
-                    ctx.strokeStyle = this.data.historyTrendDirection === 'down' ? '#38bdf8' : '#dc2626';
+                    // 红涨绿跌（中国市场习惯）
+                    ctx.strokeStyle = this.data.historyTrendDirection === 'down' ? '#22c55e' : '#dc2626';
                     historyList.forEach((item, index) => {
                         const x = paddingLeft + (index / (historyList.length - 1)) * chartWidth;
                         const y = height - paddingBottom - ((item.price - minPrice) / range) * chartHeight;
@@ -693,19 +834,5 @@ Page({
                     ctx.fillText(`¥${Math.round(price)}`, paddingLeft - 6, y + 3);
                 }
             });
-    },
-
-    onShareAppMessage() {
-        return {
-            title: '回收行情',
-            path: '/pages/market/market',
-        };
-    },
-
-    onShareTimeline() {
-        return {
-            title: '回收行情',
-            query: '',
-        };
     },
 });

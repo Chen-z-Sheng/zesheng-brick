@@ -3,9 +3,11 @@ package com.zesheng.common.kuaidi100;
 import com.kuaidi100.sdk.response.AutoNumResp;
 import com.zesheng.common.dto.logistics.LogisticsTraceVo;
 import com.zesheng.common.exception.BizException;
+import com.zesheng.common.util.ExpressNoSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,5 +59,42 @@ public final class Kuaidi100LogisticsQuerySupport {
             log.warn("快递100查询异常, no={}", no, e);
             return LogisticsTraceVo.fail("物流查询异常，请稍后重试");
         }
+    }
+
+    /**
+     * 按多个运单号依次查询，返回与输入顺序一致的结果列表
+     */
+    public static List<LogisticsTraceVo> queryTraceList(
+            String logisticsCompanyDisplayName,
+            List<String> trackingNos,
+            String phoneForCourier,
+            LogisticsComCodeResolver nameToCode,
+            Kuaidi100ClientUtil client) {
+        List<String> nos = ExpressNoSupport.normalizeInputList(trackingNos);
+        if (nos.isEmpty()) {
+            List<LogisticsTraceVo> empty = new ArrayList<>();
+            empty.add(LogisticsTraceVo.fail("缺少快递单号"));
+            return empty;
+        }
+        List<LogisticsTraceVo> result = new ArrayList<>(nos.size());
+        for (String no : nos) {
+            result.add(queryTrace(logisticsCompanyDisplayName, no, phoneForCourier, nameToCode, client));
+        }
+        return result;
+    }
+
+    /**
+     * 多单号摘要：优先取第一条查询成功的轨迹，否则返回第一条结果
+     */
+    public static LogisticsTraceVo pickPrimaryTrace(List<LogisticsTraceVo> traces) {
+        if (traces == null || traces.isEmpty()) {
+            return LogisticsTraceVo.fail("缺少快递单号");
+        }
+        for (LogisticsTraceVo trace : traces) {
+            if (trace != null && trace.isSuccess()) {
+                return trace;
+            }
+        }
+        return traces.get(0);
     }
 }

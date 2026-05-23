@@ -9,7 +9,6 @@
     <view class="state-box" wx:elif="{{initError}}">
         <text class="state-title state-title--error">暂时无法连接智能客服</text>
         <text class="state-desc">{{initError}}</text>
-        <button class="retry-btn" bindtap="onRetryTap">重新连接</button>
     </view>
 
     <!-- 聊天界面 - 使用官方 chat 组件，自带输入栏 -->

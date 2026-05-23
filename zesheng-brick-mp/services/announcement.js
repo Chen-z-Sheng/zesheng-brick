@@ -23,11 +23,11 @@ function getLatestToShow() {
 }
 
 /**
- * 获取公告历史列表
+ * 获取公告历史列表（供首页滚动条与历史页；未登录不请求，避免无效 401）
  * @returns {Promise<Array>}
  */
 function getHistoryList() {
-    if (!hasLoggedInUser()) {
+    if (!getToken()) {
         return Promise.resolve([]);
     }
     return request.get('/announcements/history', {}, { showLoading: false }).then((data) => {

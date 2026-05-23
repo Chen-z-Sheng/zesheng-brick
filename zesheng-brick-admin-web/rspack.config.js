@@ -1,4 +1,16 @@
 const path = require("path");
+const buildMode = process.argv[2] === "build" ? "production" : "development";
+require("dotenv").config({
+  path: path.resolve(__dirname, `.env.${buildMode}`),
+});
+
+function readEnv(key, fallback = "") {
+  const raw = process.env[key];
+  if (raw == null || raw === "") {
+    return fallback;
+  }
+  return String(raw).trim().replace(/^['"]|['"]$/g, "");
+}
 const { Configuration, DefinePlugin } = require("@rspack/core");
 const HtmlRspackPlugin = require("html-rspack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
@@ -18,7 +30,8 @@ process.env.VUE_APP_UPDATE_TIME = time;
 process.env.BASE_URL = publicPath;
 // 删除这一行，避免覆盖rspack.js中设置的值
 // process.env.NODE_ENV = process.env.NODE_ENV || 'development'
-process.env.VUE_APP_MOCK_ENABLE = "true"; // 始终启用mock
+process.env.VUE_APP_MOCK_ENABLE =
+  process.env.VUE_APP_USE_MOCK === "true" ? "true" : "false";
 process.env.VUE_APP_AUTHOR = "泽晟搬砖"; // 设置作者（注入 HTML meta）
 
 const resolve = (dir) => path.join(__dirname, dir);
@@ -41,12 +54,9 @@ module.exports = {
     chunkFilename: "js/[name].[contenthash:8].js",
     assetModuleFilename: `${assetsDir}/[name].[ext][query]`,
   },
-  // 增加性能提示配置
   performance: {
-    // 提高阈值以减少警告
-    maxEntrypointSize: 3000000, // 3MB
-    maxAssetSize: 1000000, // 1MB
-    // 只在生产环境显示性能警告
+    maxEntrypointSize: 3000000,
+    maxAssetSize: 1000000,
     hints: mode === "production" ? "warning" : false,
   },
   module: {
@@ -102,12 +112,18 @@ module.exports = {
               },
               additionalData: (content, loaderContext) => {
                 const { resourcePath, rootContext } = loaderContext;
-                const relativePath = path.relative(rootContext, resourcePath);
+                const relativePath = path
+                  .relative(rootContext, resourcePath)
+                  .replace(/\\/g, "/");
+                if (relativePath === "src/styles/variables.scss") {
+                  return content;
+                }
+                // 仅对 Vue 与主样式入口注入变量，避免 @use 子模块重复注入导致编译失败
                 if (
-                  relativePath.replace(/\\/g, "/") !==
-                  "src/styles/variables.scss"
+                  relativePath.endsWith(".vue") ||
+                  relativePath === "src/styles/vab.scss"
                 ) {
-                  return `@import "~@/styles/variables.scss";${content}`;
+                  return `@use "@/styles/variables.scss" as *;\n${content}`;
                 }
                 return content;
               },
@@ -162,7 +178,20 @@ module.exports = {
       "process.env.NODE_ENV": JSON.stringify(mode),
       "process.env.BASE_URL": JSON.stringify(process.env.BASE_URL),
       "process.env.VUE_APP_TITLE": JSON.stringify(process.env.VUE_APP_TITLE),
-      "process.env.VUE_APP_MOCK_ENABLE": JSON.stringify("true"), // 确保在所有环境中mock都为true
+      "process.env.VUE_APP_MOCK_ENABLE": JSON.stringify(
+        process.env.VUE_APP_MOCK_ENABLE || "false"
+      ),
+      "process.env.VUE_APP_USE_MOCK": JSON.stringify(
+        readEnv("VUE_APP_USE_MOCK", "false")
+      ),
+      "process.env.VUE_APP_API_BASE_URL": JSON.stringify(
+        readEnv(
+          "VUE_APP_API_BASE_URL",
+          buildMode === "production"
+            ? "/api"
+            : "http://127.0.0.1:9068/api"
+        )
+      ),
       "process.env.VUE_APP_AUTHOR": JSON.stringify(process.env.VUE_APP_AUTHOR),
       "process.env.VUE_APP_UPDATE_TIME": JSON.stringify(
         process.env.VUE_APP_UPDATE_TIME
@@ -219,7 +248,19 @@ module.exports = {
           test: /[\\/]node_modules[\\/]element-plus(.*)[\\/]/,
           priority: 30,
         },
-        // 单独拆分常用工具库
+        elementIcons: {
+          name: "element-icons",
+          test: /[\\/]node_modules[\\/]@element-plus[\\/]icons-vue[\\/]/,
+          chunks: "all",
+          priority: 32,
+        },
+        echarts: {
+          name: "echarts",
+          test: /[\\/]node_modules[\\/](echarts|zrender)[\\/]/,
+          chunks: "async",
+          priority: 33,
+          maxSize: 512000,
+        },
         vendors: {
           name: "vendors",
           test: /[\\/]node_modules[\\/](lodash|axios|qs|dayjs)[\\/]/,
@@ -268,9 +309,10 @@ module.exports = {
         throw new Error("dev-server is not defined");
       }
 
-      // 始终加载mock服务器
-      const mockServer = require("./mock");
-      mockServer(devServer.app);
+      if (readEnv("VUE_APP_USE_MOCK", "false") === "true") {
+        const mockServer = require("./mock");
+        mockServer(devServer.app);
+      }
 
       return middlewares;
     },

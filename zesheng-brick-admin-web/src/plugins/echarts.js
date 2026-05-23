@@ -1,4 +1,3 @@
-import 'echarts'
-import VabChart from 'vue-echarts'
+import VabChart from "@/components/VabChart/index.vue";
 
-export default VabChart
+export default VabChart;

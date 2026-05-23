@@ -32,6 +32,9 @@ const {
   validateSenderInput,
   normalizeLogisticsSuggestList,
   validateLogisticsSelected,
+  createEmptyExpressItem,
+  collectExpressNos,
+  validateExpressNoList,
 } = require('../../utils/order-form-shared');
 
 /** 与行情报单共用本地兜底缓存键 */
@@ -67,7 +70,7 @@ Page({
     schemeName: '',
     giftDesc: '',
     quantity: 1,
-    expressNo: '',
+    expressNoList: [createEmptyExpressItem()],
     orderNoMain: '',
     orderNoGift: '',
     imageUrls: [],
@@ -261,7 +264,7 @@ Page({
           deliveryAddressText: '',
           giftDesc: '',
           quantity: 1,
-          expressNo: '',
+          expressNoList: [createEmptyExpressItem()],
           orderNoMain: '',
           orderNoGift: '',
           imageUrls: [],
@@ -389,7 +392,31 @@ Page({
   },
 
   onExpressNoInput(e) {
-    this.setData({ expressNo: e.detail.value || '' });
+    const index = Number(e.currentTarget.dataset.index);
+    const value = e.detail.value || '';
+    const list = (this.data.expressNoList || []).slice();
+    if (index < 0 || index >= list.length) return;
+    list[index] = { no: value };
+    this.setData({ expressNoList: list });
+  },
+
+  addExpressNoItem() {
+    const list = (this.data.expressNoList || []).slice();
+    list.push(createEmptyExpressItem());
+    this.setData({ expressNoList: list });
+  },
+
+  removeExpressNoItem(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    const list = (this.data.expressNoList || []).slice();
+    if (list.length <= 1) {
+      this.setData({ expressNoList: [createEmptyExpressItem()] });
+      return;
+    }
+    if (index >= 0 && index < list.length) {
+      list.splice(index, 1);
+      this.setData({ expressNoList: list });
+    }
   },
 
   onLogisticsHelpTap() {
@@ -721,7 +748,7 @@ Page({
       currentPlan,
       quantity,
       giftDesc,
-      expressNo,
+      expressNoList,
       orderNoMain,
       orderNoGift,
       imageUrls,
@@ -738,13 +765,14 @@ Page({
       senderName = (s.name || '').trim();
       senderPhone = (s.phone || '').trim();
     }
+    const expressNos = collectExpressNos(expressNoList);
     return {
       schemeId: currentPlan ? currentPlan.id : null,
       quantity: quantity || 1,
       status,
       dataJson: {
         giftDesc: giftDesc || '',
-        expressNo: expressNo || '',
+        expressNos,
         senderName,
         senderPhone,
         logisticsCompany: (logisticsSelected || '').trim(),
@@ -758,9 +786,10 @@ Page({
   },
 
   validateForSubmit() {
-    const { currentPlan, expressNo, quantity } = this.data;
+    const { currentPlan, expressNoList, quantity } = this.data;
     if (!currentPlan) return '请选择下单方案';
-    if (isEmptyValue(expressNo)) return '请填写快递单号';
+    const expressErr = validateExpressNoList(expressNoList, '请填写快递单号');
+    if (expressErr) return expressErr;
     if (!Number.isFinite(quantity) || quantity < 1) return '下单数量至少为1';
     const pickErr = this.validateLogisticsPick();
     if (pickErr) return pickErr;

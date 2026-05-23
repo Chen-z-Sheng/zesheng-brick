@@ -9,7 +9,6 @@
         "pages/sell-order/sell-order",
         "pages/order-list/order-list",
         "pages/order-detail/order-detail",
-        "pages/login/login",
         "pages/sms-login/sms-login",
         "pages/profile/profile",
         "pages/payment-info/payment-info",
@@ -19,12 +18,13 @@
         "pages/about/about",
         "pages/announcement-history/index",
         "pages/customer-service/customer-service",
+        "pages/legal-doc/legal-doc",
         "pages/webview/webview"
     ],
     "lazyCodeLoading": "requiredComponents",
     "plugins": {
-        "myPlugin": {
-            "version": "1.4.14",
+        "chatbot": {
+            "version": "1.4.16",
             "provider": "wx8c631f7e9f2465e1"
         }
     },
@@ -47,7 +47,7 @@
                 "pagePath": "pages/index/index",
                 "text": "首页",
                 "iconPath": "/images/icon/home.png",
-                "selectedIconPath": "/images/icon/home-avtice.png"
+                "selectedIconPath": "/images/icon/home-active.png"
             },
             {
                 "pagePath": "pages/market/market",

@@ -68,11 +68,6 @@ Page({
         }
     },
 
-    onRetryTap() {
-        resetChatbotInit();
-        this.initService();
-    },
-
     getQueryCallback() {},
 
     goBackHome() {

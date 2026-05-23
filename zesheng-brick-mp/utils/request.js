@@ -8,8 +8,8 @@ const { setGlobalUserInfo } = require('../services/auth-state');
  */
 let isRefreshing = false;
 let refreshSubscribers = [];
-const UNAUTHORIZED_CODES = [401, 10004, 10005];
-const UNAUTHORIZED_KEYWORDS = ['未登录', 'token过期', 'token已过期', 'token无效', '登录已过期', 'unauthorized'];
+const UNAUTHORIZED_CODES = [401, 10004, 10005, 10006];
+const UNAUTHORIZED_KEYWORDS = ['未登录', 'token过期', 'token已过期', 'token无效', '登录已过期', '其他设备登录', 'unauthorized'];
 
 /** 解析 JWT payload 的 exp（秒），若距过期不足此毫秒数则视为即将过期 */
 const EXPIRE_BUFFER_MS = 5 * 60 * 1000;
@@ -78,6 +78,16 @@ function isUnauthorizedMessage(respData) {
     return UNAUTHORIZED_KEYWORDS.some((keyword) => message.indexOf(keyword.toLowerCase()) >= 0);
 }
 
+/** 与后端 Security permitAll、AuthInterceptor 白名单一致 */
+function isPublicApiUrl(url) {
+    if (!url || typeof url !== 'string') {
+        return false;
+    }
+    return url.startsWith('/public/')
+        || url === '/announcements/history'
+        || url.startsWith('/announcements/history?');
+}
+
 function shouldHandleUnauthorized(statusCode, respData) {
     if (statusCode === 401) return true;
     if (statusCode === 403 && isUnauthorizedMessage(respData)) return true;
@@ -129,8 +139,8 @@ function ensureValidToken() {
 
 // 刷新token
 const refreshToken = async () => {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) {
+  const storedRefreshToken = getRefreshToken();
+  if (!storedRefreshToken) {
     return Promise.reject(new Error('No refresh token'));
   }
 
@@ -138,7 +148,7 @@ const refreshToken = async () => {
     wx.request({
       url: `${BASE_URL}/auth/refresh-token`,
       method: 'POST',
-      data: { refreshToken },
+      data: { refreshToken: storedRefreshToken },
       timeout: TIMEOUT,
       header: {
         'Content-Type': 'application/json',
@@ -156,7 +166,9 @@ const refreshToken = async () => {
         }
       },
       fail: (err) => {
-        reject(err);
+        // 网络错误（超时、连接失败等）静默处理，不阻塞启动
+        console.warn('刷新Token请求失败:', err && err.errMsg);
+        resolve(''); // 返回空字符串，让调用方走降级逻辑
       },
     });
   });
@@ -212,12 +224,20 @@ const request = function (config) {
   var showLoading = config.showLoading || false;
   var suppressBusinessToast = config.suppressBusinessToast === true;
 
-  return ensureValidToken().then(function (token) {
+  var isPublicApi = isPublicApiUrl(url);
+  var tokenPromise = isPublicApi ? Promise.resolve('') : ensureValidToken();
+
+  return tokenPromise.then(function (token) {
     return new Promise(function (resolve, reject) {
       function handleUnauthorized(reqConfig) {
         if (reqConfig.url === '/auth/refresh-token') {
           forceLogout();
           reject(new Error('Refresh token expired'));
+          return;
+        }
+        // 公开接口收到 401 直接结束，不尝试刷新 token（正常不应出现，避免误走登录态逻辑）
+        if (isPublicApiUrl(reqConfig.url)) {
+          reject(new Error('Unauthorized'));
           return;
         }
         var hasRefreshToken = !!getRefreshToken();
@@ -281,6 +301,18 @@ const request = function (config) {
           };
 
           if (shouldHandleUnauthorized(statusCode, respData)) {
+            // 已在其他设备登录，勿用 refresh 续期，直接清本地登录态
+            if (Number(respData && respData.code) === 10006) {
+              forceLogout();
+              if (!suppressBusinessToast) {
+                wx.showToast({
+                  title: respData.msg || respData.message || '账号已在其他设备登录，请重新登录',
+                  icon: 'none',
+                });
+              }
+              reject(respData);
+              return;
+            }
             handleUnauthorized(reqConfig);
             return;
           }

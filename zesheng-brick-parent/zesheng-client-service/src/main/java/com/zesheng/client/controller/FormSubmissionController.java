@@ -23,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -96,7 +98,7 @@ public class FormSubmissionController {
 
     @GetMapping("/{id}/logistics-trace")
     @Operation(summary = "我的固结报单物流轨迹（快递100）")
-    public R<LogisticsTraceVo> logisticsTrace(@PathVariable Long id, HttpServletRequest request) {
+    public R<List<LogisticsTraceVo>> logisticsTrace(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getUserId(request);
         return R.success(logisticsTraceService.traceFormSubmissionForUser(userId, id));
     }

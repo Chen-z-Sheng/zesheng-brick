@@ -1,4 +1,5 @@
 const { getFormSubmissionMyPage, getSellOrderMyPage, postLogisticsSummaries } = require('../../services/order');
+const { formatExpressNosDisplay } = require('../../utils/order-form-shared');
 
 const PAGE_SIZE = 20;
 const TABS = [
@@ -45,8 +46,7 @@ function pickTrim(obj, ...keys) {
 function normalizeForm(r) {
     const code = r.status != null ? (typeof r.status === 'object' ? r.status.code : r.status) : null;
     const dataJson = r.dataJson || r.data_json || {};
-    const rawExpress = dataJson.expressNo ?? dataJson.express_no ?? r.expressNo ?? r.logisticsNo ?? '';
-    const expressNo = rawExpress != null && rawExpress !== '' ? String(rawExpress).trim() : '';
+    const expressNoDisplay = formatExpressNosDisplay({ expressNos: dataJson.expressNos });
     const logisticsCompany = pickTrim(dataJson, 'logisticsCompany', 'expressCompany');
     const senderName = pickTrim(dataJson, 'senderName');
     const senderPhone = pickTrim(dataJson, 'senderPhone');
@@ -62,7 +62,7 @@ function normalizeForm(r) {
         statusCategoryText: STATUS_CATEGORY[code] || '—',
         schemeName: r.schemeName || '固结报单',
         quantity: r.quantity,
-        expressNo,
+        expressNo: expressNoDisplay,
         logisticsCompany,
         senderName,
         senderPhone,
@@ -79,6 +79,7 @@ function normalizeSell(r) {
     const storage = r.storage != null ? Number(r.storage) : NaN;
     const depositText = storage === 1 ? '寄存' : (storage === 0 ? '不寄存' : '—');
     const adminNote = (r.adminInternalNote != null && r.adminInternalNote !== '') ? String(r.adminInternalNote).trim() : '';
+    const logisticsNoDisplay = formatExpressNosDisplay({ logisticsNos: r.logisticsNos });
     return {
         type: 'sell',
         id: r.id,
@@ -91,20 +92,16 @@ function normalizeSell(r) {
         logisticsCompany: (r.logisticsCompany || '').trim(),
         senderName: (r.senderName || '').trim(),
         senderPhone: (r.senderPhone || '').trim(),
-        logisticsNo: r.logisticsNo || '',
+        logisticsNo: logisticsNoDisplay,
         productDetail,
         depositText,
-        summary: ((r.logisticsCompany || '') + ' ' + (r.logisticsNo || '')).trim() || '行情报单',
+        summary: ((r.logisticsCompany || '') + ' ' + logisticsNoDisplay).trim() || '行情报单',
         adminInternalNote: adminNote
     };
 }
 
-/** 仅当同时填写寄件人姓名、手机号与物流公司时才拉取物流摘要（否则只展示单号） */
+/** 有快递单号即尝试拉取物流摘要（后端会用物流公司或智能识别） */
 function shouldFetchLogisticsSummary(row) {
-    const company = (row.logisticsCompany || '').trim();
-    const name = (row.senderName || '').trim();
-    const phone = (row.senderPhone || '').trim();
-    if (!company || !name || !phone) return false;
     if (row.type === 'sell') return !!(row.logisticsNo || '').trim();
     if (row.type === 'form') return !!(row.expressNo || '').trim();
     return false;

@@ -16,11 +16,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.lang.management.RuntimeMXBean;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,6 +41,7 @@ import java.util.List;
 public class DashboardServiceImpl implements IDashboardService {
 
     private static final int RECENT_DAYS = 7;
+    private static final Path LINUX_MEMINFO = Path.of("/proc/meminfo");
 
     private final FormSubmissionMapper formSubmissionMapper;
     private final ClientUserMapper clientUserMapper;
@@ -118,17 +123,15 @@ public class DashboardServiceImpl implements IDashboardService {
         double heapPct = heapMax > 0 ? (heapUsed * 100.0 / heapMax) : 0.0;
 
         Double cpuPct = null;
-        Double memPct = null;
+        Double memPct = readPhysicalMemoryUsedPercent();
         try {
             OperatingSystemMXBean os = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
             double load = os.getSystemCpuLoad();
             if (load >= 0) {
                 cpuPct = round2(load * 100.0);
             }
-            long totalMem = os.getTotalPhysicalMemorySize();
-            long freeMem = os.getFreePhysicalMemorySize();
-            if (totalMem > 0) {
-                memPct = round2((totalMem - freeMem) * 100.0 / totalMem);
+            if (memPct == null) {
+                memPct = readPhysicalMemoryUsedPercentFromJmx(os);
             }
         } catch (Throwable e) {
             log.debug("读取 OSBean 指标失败: {}", e.getMessage());
@@ -159,6 +162,82 @@ public class DashboardServiceImpl implements IDashboardService {
                 .diskPathNote(diskNote)
                 .jvmUptimeMs(rt.getUptime())
                 .build();
+    }
+
+    /**
+     * 物理内存使用率：Linux 优先读 /proc/meminfo 的 MemAvailable（与 free、云监控口径一致）
+     */
+    private static Double readPhysicalMemoryUsedPercent() {
+        if (!Files.isReadable(LINUX_MEMINFO)) {
+            return null;
+        }
+        long memTotalKb = -1;
+        long memAvailableKb = -1;
+        long memFreeKb = -1;
+        long cachedKb = 0;
+        long buffersKb = 0;
+        try (BufferedReader reader = Files.newBufferedReader(LINUX_MEMINFO, StandardCharsets.US_ASCII)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("MemTotal:")) {
+                    memTotalKb = parseMeminfoValueKb(line);
+                } else if (line.startsWith("MemAvailable:")) {
+                    memAvailableKb = parseMeminfoValueKb(line);
+                } else if (line.startsWith("MemFree:")) {
+                    memFreeKb = parseMeminfoValueKb(line);
+                } else if (line.startsWith("Cached:")) {
+                    cachedKb = parseMeminfoValueKb(line);
+                } else if (line.startsWith("Buffers:")) {
+                    buffersKb = parseMeminfoValueKb(line);
+                }
+                if (memTotalKb >= 0 && memAvailableKb >= 0) {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        if (memTotalKb <= 0) {
+            return null;
+        }
+        if (memAvailableKb < 0) {
+            // 旧内核无 MemAvailable 时近似估算
+            if (memFreeKb < 0) {
+                return null;
+            }
+            memAvailableKb = memFreeKb + cachedKb + buffersKb;
+        }
+        long usedKb = memTotalKb - memAvailableKb;
+        if (usedKb < 0) {
+            usedKb = 0;
+        }
+        return round2(usedKb * 100.0 / memTotalKb);
+    }
+
+    private static Double readPhysicalMemoryUsedPercentFromJmx(OperatingSystemMXBean os) {
+        long totalMem = os.getTotalPhysicalMemorySize();
+        long freeMem = os.getFreePhysicalMemorySize();
+        if (totalMem <= 0) {
+            return null;
+        }
+        return round2((totalMem - freeMem) * 100.0 / totalMem);
+    }
+
+    private static long parseMeminfoValueKb(String line) {
+        int colon = line.indexOf(':');
+        if (colon < 0) {
+            return -1;
+        }
+        String num = line.substring(colon + 1).trim();
+        int space = num.indexOf(' ');
+        if (space > 0) {
+            num = num.substring(0, space);
+        }
+        try {
+            return Long.parseLong(num);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
     private static double round2(double v) {

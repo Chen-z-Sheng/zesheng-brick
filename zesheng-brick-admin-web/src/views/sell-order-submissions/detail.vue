@@ -53,7 +53,24 @@
                 </el-col>
                 <el-col :span="12">
                   <el-form-item label="寄件单号">
-                    <el-input v-model="form.logisticsNo" placeholder="寄件单号" />
+                    <div class="express-no-editor">
+                      <div
+                        v-for="(item, index) in logisticsNoList"
+                        :key="index"
+                        class="express-no-row"
+                      >
+                        <el-input v-model="item.no" placeholder="寄件单号" />
+                        <el-button
+                          v-if="logisticsNoList.length > 1"
+                          type="danger"
+                          link
+                          @click="removeLogisticsNo(index)"
+                        >
+                          删除
+                        </el-button>
+                      </div>
+                      <el-button type="primary" link @click="addLogisticsNo">+ 添加快递单号</el-button>
+                    </div>
                   </el-form-item>
                 </el-col>
                 <el-col :span="6">
@@ -153,23 +170,26 @@
           <section v-if="detail" class="panel full-width">
             <div class="section-title">物流轨迹</div>
             <div v-if="logisticsLoading" class="logistics-muted">正在查询物流…</div>
-            <template v-else-if="logisticsTrace">
-              <div v-if="logisticsTrace.success" class="logistics-head">
-                <el-tag type="primary" size="small">{{ logisticsTrace.stateText }}</el-tag>
-                <span v-if="logisticsTrace.lastTime" class="logistics-time">{{ logisticsTrace.lastTime }}</span>
+            <template v-else-if="logisticsTraceList.length">
+              <div v-for="(trace, traceIdx) in logisticsTraceList" :key="traceIdx" class="logistics-multi-block">
+                <div class="logistics-multi-title">{{ trace.trackingNo || `快递单号 ${traceIdx + 1}` }}</div>
+                <div v-if="trace.success" class="logistics-head">
+                  <el-tag type="primary" size="small">{{ trace.stateText }}</el-tag>
+                  <span v-if="trace.lastTime" class="logistics-time">{{ trace.lastTime }}</span>
+                </div>
+                <p v-if="trace.success" class="logistics-latest">{{ trace.lastInfo || '—' }}</p>
+                <el-alert v-else type="warning" :closable="false" show-icon :title="trace.errorMessage || '暂无物流'" />
+                <el-timeline v-if="trace.success && trace.traces?.length" class="logistics-timeline">
+                  <el-timeline-item
+                    v-for="(row, idx) in trace.traces"
+                    :key="idx"
+                    :timestamp="row.time"
+                    placement="top"
+                  >
+                    {{ row.context }}
+                  </el-timeline-item>
+                </el-timeline>
               </div>
-              <p v-if="logisticsTrace.success" class="logistics-latest">{{ logisticsTrace.lastInfo || '—' }}</p>
-              <el-alert v-else type="warning" :closable="false" show-icon :title="logisticsTrace.errorMessage || '暂无物流'" />
-              <el-timeline v-if="logisticsTrace.success && logisticsTrace.traces?.length" class="logistics-timeline">
-                <el-timeline-item
-                  v-for="(row, idx) in logisticsTrace.traces"
-                  :key="idx"
-                  :timestamp="row.time"
-                  placement="top"
-                >
-                  {{ row.context }}
-                </el-timeline-item>
-              </el-timeline>
             </template>
           </section>
 
@@ -216,6 +236,11 @@ import {
 } from '@/api/sell-order-submissions'
 import { getPricesByDate } from '@/api/recycle-market'
 import UserPaymentInfoDialog from '@/components/UserPaymentInfoDialog/index.vue'
+import {
+  createEmptyExpressItem,
+  normalizeExpressNoList,
+  collectExpressNos,
+} from '@/utils/expressNo'
 
 const route = useRoute()
 const router = useRouter()
@@ -223,7 +248,8 @@ const id = ref(route.query.id)
 const detail = ref(null)
 const loading = ref(false)
 const saving = ref(false)
-const logisticsTrace = ref(null)
+const logisticsTraceList = ref([])
+const logisticsNoList = ref([createEmptyExpressItem()])
 const logisticsLoading = ref(false)
 const paymentDialogVisible = ref(false)
 const pricesByDate = ref([])
@@ -231,7 +257,6 @@ const form = ref({
   senderName: '',
   senderPhone: '',
   logisticsCompany: '',
-  logisticsNo: '',
   storage: 0,
   storageDate: null,
   remark: '',
@@ -291,6 +316,24 @@ function matchRecyclePrice(productName) {
   return vo ? Number(vo.recyclePrice) : null
 }
 
+function addLogisticsNo() {
+  logisticsNoList.value.push(createEmptyExpressItem())
+}
+
+function removeLogisticsNo(index) {
+  if (logisticsNoList.value.length <= 1) {
+    logisticsNoList.value = [createEmptyExpressItem()]
+    return
+  }
+  logisticsNoList.value.splice(index, 1)
+}
+
+function normalizeTraceList(raw) {
+  if (Array.isArray(raw)) return raw
+  if (raw && typeof raw === 'object') return [raw]
+  return []
+}
+
 function syncFormFromDetail() {
   if (!detail.value) return
   const d = detail.value
@@ -298,11 +341,11 @@ function syncFormFromDetail() {
   // 寄存日期：后端为 DATE，用 datetime 选择器时需补全为 YYYY-MM-DD HH:mm:ss 供组件显示，保存时再只传日期部分
   const storageDateStr = d.storageDate ? String(d.storageDate).trim() : ''
   const storageDateForPicker = storageDateStr.length >= 10 ? (storageDateStr.slice(0, 10) + ' 00:00:00') : null
+  logisticsNoList.value = normalizeExpressNoList({ logisticsNos: d.logisticsNos })
   form.value = {
     senderName: d.senderName ?? '',
     senderPhone: d.senderPhone ?? '',
     logisticsCompany: d.logisticsCompany ?? '',
-    logisticsNo: d.logisticsNo ?? '',
     storage: d.storage !== undefined && d.storage !== null ? d.storage : 0,
     storageDate: storageDateForPicker,
     remark: d.remark ?? '',
@@ -368,11 +411,12 @@ function formatTime(v) {
 async function loadLogistics() {
   if (!id.value) return
   logisticsLoading.value = true
-  logisticsTrace.value = null
+  logisticsTraceList.value = []
   try {
-    logisticsTrace.value = await getSellOrderSubmissionLogisticsTrace(id.value)
+    const res = await getSellOrderSubmissionLogisticsTrace(id.value)
+    logisticsTraceList.value = normalizeTraceList(res)
   } catch {
-    logisticsTrace.value = null
+    logisticsTraceList.value = []
   } finally {
     logisticsLoading.value = false
   }
@@ -414,7 +458,7 @@ async function save() {
       senderName: form.value.senderName,
       senderPhone: form.value.senderPhone,
       logisticsCompany: form.value.logisticsCompany,
-      logisticsNo: form.value.logisticsNo,
+      logisticsNos: collectExpressNos(logisticsNoList.value),
       storage: form.value.storage,
       storageDate: form.value.storageDate ? String(form.value.storageDate).slice(0, 10) : null,
       remark: form.value.remark,
@@ -590,6 +634,29 @@ onMounted(() => {
 .logistics-timeline {
   margin-top: 8px;
   padding-left: 4px;
+}
+.express-no-editor {
+  width: 100%;
+}
+.express-no-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.express-no-row .el-input {
+  flex: 1;
+}
+.logistics-multi-block + .logistics-multi-block {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+.logistics-multi-title {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 600;
 }
 @media (max-width: 900px) {
   .detail-grid {

@@ -123,6 +123,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getFormSubmissions } from '@/api/form-submissions'
+import { formatExpressNosDisplay } from '@/utils/expressNo'
 
 const DEBOUNCE_MS = 600
 
@@ -160,10 +161,12 @@ function statusTagType(code) {
   return types[code] ?? 'info'
 }
 
+
 function dataJsonSummary(data) {
   if (!data || typeof data !== 'object') return '-'
   const parts = []
-  if (data.expressNo) parts.push(`快递: ${data.expressNo}`)
+  const expressText = formatExpressNosDisplay({ expressNos: data.expressNos })
+  if (expressText) parts.push(`快递: ${expressText}`)
   if (data.remark) parts.push(data.remark)
   return parts.length ? parts.join(' | ') : JSON.stringify(data).slice(0, 60)
 }

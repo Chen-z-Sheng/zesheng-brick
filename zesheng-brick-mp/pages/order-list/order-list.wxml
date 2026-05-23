@@ -42,6 +42,7 @@
                                     <text class="order-card__logistics-label">最新物流</text>
                                     <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
                                     <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                    <text class="order-card__logistics-err" wx:else>暂无物流信息</text>
                                 </view>
                             </block>
                             <block wx:else>
@@ -52,6 +53,7 @@
                                     <text class="order-card__logistics-label">最新物流</text>
                                     <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
                                     <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                    <text class="order-card__logistics-err" wx:else>暂无物流信息</text>
                                 </view>
                             </block>
                             <view class="order-card__admin-note" wx:if="{{item.adminInternalNote}}">
@@ -99,6 +101,7 @@
                                     <text class="order-card__logistics-label">最新物流</text>
                                     <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
                                     <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                    <text class="order-card__logistics-err" wx:else>暂无物流信息</text>
                                 </view>
                             </block>
                             <block wx:else>
@@ -109,6 +112,7 @@
                                     <text class="order-card__logistics-label">最新物流</text>
                                     <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
                                     <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                    <text class="order-card__logistics-err" wx:else>暂无物流信息</text>
                                 </view>
                             </block>
                             <view class="order-card__admin-note" wx:if="{{item.adminInternalNote}}">
@@ -155,6 +159,7 @@
                                     <text class="order-card__logistics-label">最新物流</text>
                                     <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
                                     <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                    <text class="order-card__logistics-err" wx:else>暂无物流信息</text>
                                 </view>
                             </block>
                             <block wx:else>
@@ -165,6 +170,7 @@
                                     <text class="order-card__logistics-label">最新物流</text>
                                     <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
                                     <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                    <text class="order-card__logistics-err" wx:else>暂无物流信息</text>
                                 </view>
                             </block>
                             <view class="order-card__admin-note" wx:if="{{item.adminInternalNote}}">
@@ -211,6 +217,7 @@
                                     <text class="order-card__logistics-label">最新物流</text>
                                     <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
                                     <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                    <text class="order-card__logistics-err" wx:else>暂无物流信息</text>
                                 </view>
                             </block>
                             <block wx:else>
@@ -221,6 +228,7 @@
                                     <text class="order-card__logistics-label">最新物流</text>
                                     <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
                                     <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                    <text class="order-card__logistics-err" wx:else>暂无物流信息</text>
                                 </view>
                             </block>
                             <view class="order-card__admin-note" wx:if="{{item.adminInternalNote}}">
@@ -267,6 +275,7 @@
                                     <text class="order-card__logistics-label">最新物流</text>
                                     <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
                                     <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                    <text class="order-card__logistics-err" wx:else>暂无物流信息</text>
                                 </view>
                             </block>
                             <block wx:else>
@@ -277,6 +286,7 @@
                                     <text class="order-card__logistics-label">最新物流</text>
                                     <text class="order-card__one-line" wx:if="{{item.logisticsSummary.success}}">{{item.logisticsSummary.lastTime ? item.logisticsSummary.lastTime + ' ' : ''}}{{item.logisticsSummary.lastInfo || '—'}}</text>
                                     <text class="order-card__logistics-err" wx:elif="{{item.logisticsSummary.errorMessage}}">{{item.logisticsSummary.errorMessage}}</text>
+                                    <text class="order-card__logistics-err" wx:else>暂无物流信息</text>
                                 </view>
                             </block>
                             <view class="order-card__admin-note" wx:if="{{item.adminInternalNote}}">

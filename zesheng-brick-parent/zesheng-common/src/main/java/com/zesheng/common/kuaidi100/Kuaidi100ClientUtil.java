@@ -1,6 +1,8 @@
 package com.zesheng.common.kuaidi100;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.kuaidi100.sdk.api.AutoNum;
 import com.kuaidi100.sdk.api.QueryTrack;
@@ -91,9 +93,26 @@ public class Kuaidi100ClientUtil {
             return Collections.emptyList();
         }
 
-        List<AutoNumResp> list = gson.fromJson(httpResult.getBody(),
-                new TypeToken<List<AutoNumResp>>() { }.getType());
-        return list != null ? list : Collections.emptyList();
+        String body = httpResult.getBody().trim();
+        try {
+            JsonElement root = JsonParser.parseString(body);
+            if (root.isJsonArray()) {
+                List<AutoNumResp> list = gson.fromJson(body,
+                        new TypeToken<List<AutoNumResp>>() { }.getType());
+                return list != null ? list : Collections.emptyList();
+            }
+            if (root.isJsonObject()) {
+                String returnCode = root.getAsJsonObject().has("returnCode")
+                        ? root.getAsJsonObject().get("returnCode").getAsString() : "";
+                String message = root.getAsJsonObject().has("message")
+                        ? root.getAsJsonObject().get("message").getAsString() : body;
+                log.warn("快递100智能识别失败: num={}, returnCode={}, message={}", num, returnCode, message);
+                return Collections.emptyList();
+            }
+        } catch (Exception e) {
+            log.warn("快递100智能识别响应解析失败: num={}, body={}", num, body, e);
+        }
+        return Collections.emptyList();
     }
 
     /**

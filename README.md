@@ -23,8 +23,7 @@
 
 ## 密钥与安全配置说明
 
-- **开发环境**：仓库根 `.gitignore` 已忽略两个模块的 **`application-dev.yml`**（你可本地直接写明文，正常 `git add` 不会把它提交上去）。首次克隆或缺少该文件时，在各模块 `src/main/resources/` 下执行：  
-  `cp application-dev.example.yml application-dev.yml`，再按需填写密钥（也可用环境变量覆盖示例里的占位符）。  
+- **开发环境**：仓库根 `.gitignore` 已忽略两个模块的 **`application-dev.yml`**（本地直接维护该文件即可，正常 `git add` 不会提交）。字段结构可参考同目录的 `application-prod.yml` 与 `application.yml`（`profiles.active=dev`）。换机时从备份恢复该文件，勿将密钥写入会提交进 Git 的文件。  
   若该文件**曾经进过 Git 历史**，需执行一次：  
   `git rm --cached zesheng-brick-parent/zesheng-admin-service/src/main/resources/application-dev.yml`  
   `git rm --cached zesheng-brick-parent/zesheng-client-service/src/main/resources/application-dev.yml`  
@@ -49,7 +48,7 @@
 
 1. 创建数据库并执行 `zesheng-brick-parent` 内各 `db/init`、`db/data` 脚本（顺序见 `zesheng-brick-parent/README.md`）。  
 2. 启动 Redis。  
-3. 准备好 **`application-dev.yml`**（或从 `application-dev.example.yml` 复制）后启动 **admin-service** 与 **client-service**（`--spring.profiles.active=dev`）。  
+3. 在各模块 `src/main/resources/` 下准备好 **`application-dev.yml`** 后启动 **admin-service** 与 **client-service**（默认 profile 为 `dev`，也可显式 `--spring.profiles.active=dev`）。  
 4. 启动管理后台前端（`net.config.js` / 环境变量中的接口根路径需与后端一致）。  
 5. 微信开发者工具打开小程序，`config` 中 **BASE_URL** 指向 **client-service**。
 

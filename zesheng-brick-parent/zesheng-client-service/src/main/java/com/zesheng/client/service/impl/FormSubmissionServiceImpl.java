@@ -10,6 +10,7 @@ import com.zesheng.client.mapper.FormSubmissionMapper;
 import com.zesheng.client.mapper.LogisticsCompanyMapper;
 import com.zesheng.client.service.IFormSubmissionService;
 import com.zesheng.common.response.R;
+import com.zesheng.common.util.ExpressNoSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -104,6 +105,10 @@ public class FormSubmissionServiceImpl implements IFormSubmissionService {
         }
 
         SubmissionStatus submissionStatus = SubmissionStatus.getByCode(status);
+        if (dataJson != null) {
+            List<String> expressNos = ExpressNoSupport.readExpressNosFromFormJson(dataJson);
+            ExpressNoSupport.writeExpressNosToFormJson(dataJson, expressNos);
+        }
         FormSubmission entity = new FormSubmission();
         entity.setUserId(userId);
         entity.setSchemeId(schemeId);

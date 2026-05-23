@@ -1,6 +1,97 @@
-# 服务器本机填写后的环境脚本（勿提交）
-scripts/zesheng-server-env.sh
+# ========== Monorepo 根目录统一忽略（仅此处维护，子目录勿再放 .gitignore） ==========
 
-# 本地开发含第三方密钥的 profile（勿提交）；协作者请复制 application-dev.example.yml
+# ---------- 密钥 / 本机环境（勿提交） ----------
+scripts/zesheng-server-env.sh
 zesheng-brick-parent/zesheng-admin-service/src/main/resources/application-dev.yml
 zesheng-brick-parent/zesheng-client-service/src/main/resources/application-dev.yml
+zesheng-brick-parent/docker/.env.docker.prod
+
+# ---------- Docker：保留 Dockerfile / compose / 脚本 / 示例配置，仅忽略构建产物 ----------
+zesheng-brick-parent/docker/out/*.tar
+zesheng-brick-parent/docker/admin/*.jar
+zesheng-brick-parent/docker/client/*.jar
+
+# ---------- Java / Maven ----------
+**/target/
+**/.mvn/timing.properties
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+*.class
+*.jar
+*.war
+*.ear
+*.log
+logs/
+temp/
+tmp/
+
+# ---------- Gradle（parent 模块若使用） ----------
+zesheng-brick-parent/build/
+zesheng-brick-parent/.nb-gradle/
+
+# ---------- 管理后台前端 zesheng-brick-admin-web ----------
+zesheng-brick-admin-web/node_modules/
+zesheng-brick-admin-web/dist/
+zesheng-brick-admin-web/build-log.txt
+zesheng-brick-admin-web/.env.local
+zesheng-brick-admin-web/.env.*.local
+zesheng-brick-admin-web/npm-debug.log*
+zesheng-brick-admin-web/yarn-debug.log*
+zesheng-brick-admin-web/yarn-error.log*
+zesheng-brick-admin-web/yarn.lock
+zesheng-brick-admin-web/package-lock.json
+zesheng-brick-admin-web/.history/
+zesheng-brick-admin-web/public/video/
+zesheng-brick-admin-web/src/layouts/components/layouts/
+zesheng-brick-admin-web/zx-templates/
+zesheng-brick-admin-web/src/styles/themes/green.scss
+zesheng-brick-admin-web/src/styles/themes/dark.scss
+zesheng-brick-admin-web/src/styles/themes/glory.scss
+
+# ---------- 微信小程序 zesheng-brick-mp ----------
+zesheng-brick-mp/project.private.config.json
+zesheng-brick-mp/.workbuddy/
+zesheng-brick-mp/.cloudbase/
+zesheng-brick-mp/packages/
+
+# ---------- IDE / 系统 ----------
+**/.idea/
+**/.vscode/
+*.iml
+*.iws
+*.ipr
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+[Dd]esktop.ini
+Thumbs.db
+$RECYCLE.BIN/
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+
+# ---------- Eclipse / NetBeans（Java 子模块） ----------
+**/.apt_generated
+**/.classpath
+**/.factorypath
+**/.project
+**/.settings/
+**/.springBeans
+**/.sts4-cache
+**/nbproject/private/
+**/nbbuild/
+**/nbdist/
+
+# ---------- 通用打包产物（非 Docker 目录内的零散压缩包） ----------
+*.zip
+*.7z
+*.rar

@@ -1,6 +1,19 @@
-// pages/form/form.js
+const {
+    buildShareAppMessagePayload,
+    buildShareTimelinePayload,
+    showShareMenuForPage,
+} = require('../../utils/page-share');
+
 Page({
-  data: {},
+    data: {},
+
+    onShareAppMessage() {
+        return buildShareAppMessagePayload(this);
+    },
+
+    onShareTimeline() {
+        return buildShareTimelinePayload(this);
+    },
 
     navigateToForm(e) {
         const { type } = e.currentTarget.dataset;
@@ -10,5 +23,11 @@ Page({
         wx.navigateTo({ url });
     },
 
-    onLoad() {}
+    onLoad() {
+        showShareMenuForPage(this);
+    },
+
+    onShow() {
+        showShareMenuForPage(this);
+    },
 });

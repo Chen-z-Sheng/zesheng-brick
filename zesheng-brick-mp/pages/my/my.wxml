@@ -6,7 +6,7 @@
       <view class="profile-row" bindtap="onUserCardTap">
         <view class="user-avatar-wrap">
           <view class="avatar-ring">
-            <image class="user-avatar" src="{{avatarDisplayUrl}}" mode="aspectFill"></image>
+            <image class="user-avatar" src="{{avatarDisplayUrl}}" mode="aspectFill" binderror="onAvatarError"></image>
           </view>
           <button
             wx:if="{{userInfo.userId || userInfo.id}}"
@@ -135,7 +135,6 @@
       <view class="modal-header">
         <text class="modal-emoji">📦</text>
         <text class="modal-title">寄快递提醒</text>
-        <view class="modal-close" bindtap="closeExpressPromoteModal">×</view>
       </view>
       <view class="modal-body">
         <text class="modal-text">如果有京东学生号比较推荐用京东寄快递，8元起且安全。</text>
@@ -151,8 +150,6 @@
   <!-- 登录弹窗 -->
   <login-modal
     visible="{{loginModalVisible}}"
-    title="登录"
-    desc="登录后享受更多服务"
     bind:close="handleLoginModalClose"
     bind:success="handleLoginSuccess"
   />

@@ -11,9 +11,9 @@ import java.util.Map;
  */
 public interface ILogisticsTraceService {
 
-    LogisticsTraceVo traceSellOrderForUser(Long userId, Long submissionId);
+    List<LogisticsTraceVo> traceSellOrderForUser(Long userId, Long submissionId);
 
-    LogisticsTraceVo traceFormSubmissionForUser(Long userId, Long submissionId);
+    List<LogisticsTraceVo> traceFormSubmissionForUser(Long userId, Long submissionId);
 
     Map<String, LogisticsSummaryVo> batchSummariesForUser(Long userId, List<LogisticsBatchItem> items);
 

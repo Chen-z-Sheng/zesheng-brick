@@ -1,4 +1,4 @@
-var plugin = requirePlugin("myPlugin"); 
+const plugin = requirePlugin('chatbot');
 Component({
   properties: {
     controlSwiper: Boolean,
@@ -18,7 +18,7 @@ Component({
   methods: {
     //选择guideList事件
     chooseGuide: function (e) {
-      const chat = plugin.getChatComponent(); // 通过getChatComponent方法获取到插件中的方法
+      const chat = plugin.getChatComponent();
       if (this.properties.controlSwiper) {
         this.setData(
           {

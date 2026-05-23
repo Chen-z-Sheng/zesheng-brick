@@ -309,6 +309,29 @@ page {
     line-height: 1.4;
 }
 
+.logistics-multi-item {
+    padding: 20rpx 0;
+    border-bottom: 1rpx solid #f0f0f0;
+}
+
+.logistics-multi-item:last-child {
+    border-bottom: none;
+}
+
+.logistics-multi-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16rpx;
+    margin-bottom: 12rpx;
+}
+
+.logistics-multi-no {
+    font-size: 26rpx;
+    color: #666666;
+    font-weight: 500;
+}
+
 /* ============================================
    物流时间轴
    ============================================ */

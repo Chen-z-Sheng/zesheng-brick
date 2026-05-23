@@ -24,6 +24,9 @@ const CHEAP_EXPRESS_MINI_PROGRAM_KEY = 'cheap_express_mini_program';
 /** 首页展示的客服微信号（sys_config 明文） */
 const ADMIN_WECHAT_ACCOUNT_KEY = 'admin_wechat_account';
 
+/** 首页商务合作 / 同款小程序联系方式（sys_config 明文） */
+const BUSINESS_WECHAT_ACCOUNT_KEY = 'business_wechat_account';
+
 /**
  * 获取公开系统配置（匿名可读，后端白名单校验 key）
  * @param {string} configKey
@@ -40,5 +43,6 @@ module.exports = {
   getBannerList,
   CHEAP_EXPRESS_MINI_PROGRAM_KEY,
   ADMIN_WECHAT_ACCOUNT_KEY,
+  BUSINESS_WECHAT_ACCOUNT_KEY,
   fetchPublicSysConfigByKey,
 };

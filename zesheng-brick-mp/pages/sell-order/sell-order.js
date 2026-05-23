@@ -29,7 +29,10 @@ const {
     buildSenderSelectState,
     validateSenderInput,
     normalizeLogisticsSuggestList,
-    validateLogisticsSelected
+    validateLogisticsSelected,
+    createEmptyExpressItem,
+    collectExpressNos,
+    validateExpressNoList,
 } = require('../../utils/order-form-shared');
 
 const SENDER_STORAGE_KEY = 'sell_order_sender_list';
@@ -55,7 +58,7 @@ Page({
         selectedSenderDisplay: '请选择寄件人',
         logisticsFilter: '',
         logisticsSelected: '',
-        logisticsNo: '',
+        logisticsNoList: [createEmptyExpressItem()],
         storageOptions: ['否', '是'],
         storageIndex: 0,
         remark: '',
@@ -525,7 +528,31 @@ Page({
     },
 
     onLogisticsNoInput(e) {
-        this.setData({ logisticsNo: e.detail.value });
+        const index = Number(e.currentTarget.dataset.index);
+        const value = e.detail.value || '';
+        const list = (this.data.logisticsNoList || []).slice();
+        if (index < 0 || index >= list.length) return;
+        list[index] = { no: value };
+        this.setData({ logisticsNoList: list });
+    },
+
+    addLogisticsNoItem() {
+        const list = (this.data.logisticsNoList || []).slice();
+        list.push(createEmptyExpressItem());
+        this.setData({ logisticsNoList: list });
+    },
+
+    removeLogisticsNoItem(e) {
+        const index = Number(e.currentTarget.dataset.index);
+        const list = (this.data.logisticsNoList || []).slice();
+        if (list.length <= 1) {
+            this.setData({ logisticsNoList: [createEmptyExpressItem()] });
+            return;
+        }
+        if (index >= 0 && index < list.length) {
+            list.splice(index, 1);
+            this.setData({ logisticsNoList: list });
+        }
     },
 
     onStorageChange(e) {
@@ -538,7 +565,7 @@ Page({
 
     // ==================== 提交报单 ====================
     submit() {
-        const { productList, senderList, selectedSenderIndex, logisticsSelected, logisticsNo, storageIndex, storageOptions } = this.data;
+        const { productList, senderList, selectedSenderIndex, logisticsSelected, logisticsNoList, storageIndex, storageOptions } = this.data;
         const validProducts = (productList || [])
             .map(item => ({
                 name: (item.name || '').trim(),
@@ -563,15 +590,17 @@ Page({
             wx.showToast({ title: logisticsErrorMessage, icon: 'none' });
             return;
         }
-        if (!(logisticsNo && logisticsNo.trim())) {
-            wx.showToast({ title: '请填写物流单号', icon: 'none' });
+        const logisticsNos = collectExpressNos(logisticsNoList);
+        const logisticsErr = validateExpressNoList(logisticsNoList, '请填写物流单号');
+        if (logisticsErr) {
+            wx.showToast({ title: logisticsErr, icon: 'none' });
             return;
         }
         const storage = storageIndex !== null && storageIndex >= 0 ? storageOptions[storageIndex] : '否';
         const payload = {
             items: validProducts,
             sender: { name: (sender.name || '').trim(), phone: (sender.phone || '').trim(), address: (sender.address || '').trim() },
-            logistics: { company: logisticsSelected.trim(), no: logisticsNo.trim() },
+            logistics: { company: logisticsSelected.trim(), nos: logisticsNos },
             storage,
             remark: this.data.remark ? this.data.remark.trim() : ''
         };

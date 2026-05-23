@@ -94,7 +94,6 @@ Page({
                 wx.showToast({ title: '登录失败，请重试', icon: 'none' });
                 return;
             }
-            // 核心业务逻辑：登录成功后同步全局用户信息
             getApp().globalData.userInfo = res.userInfo;
             wx.showToast({ title: res.isNewUser ? '注册成功' : '登录成功', icon: 'success' });
             setTimeout(() => {
@@ -107,4 +106,3 @@ Page({
         }
     }
 });
-

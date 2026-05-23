@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS `admin_sell_order_submissions`
     `sender_name`         VARCHAR(32)     NOT NULL COMMENT '寄件人姓名',
     `sender_phone`        VARCHAR(20)     NOT NULL COMMENT '寄件人手机号',
     `logistics_company`   VARCHAR(64)     NOT NULL COMMENT '物流公司',
-    `logistics_no`        VARCHAR(64)     NOT NULL COMMENT '寄件单号',
+    `logistics_no`        VARCHAR(512)    NOT NULL COMMENT '寄件单号（多个以英文逗号分隔）',
     `storage`             TINYINT         NOT NULL DEFAULT 0 COMMENT '是否寄存：0=否 1=是',
     `storage_date`        DATE            NULL COMMENT '寄存日期',
     `remark`              VARCHAR(500)    NULL COMMENT '用户备注',

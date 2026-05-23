@@ -83,6 +83,14 @@ public class AuthInterceptor implements HandlerInterceptor {
             log.warn("Token用户不匹配，JWT userId：{}，Redis userId：{}", jwtUserId, redisUserId);
             return writeErrorResponse(response, ResultCodeEnum.TOKEN_INVALID);
         }
+
+        // 小程序端单设备：存在 client:token 时须与当前 access token 一致
+        String clientTokenKey = "client:token:" + jwtUserId;
+        Object latestTokenObj = redisUtil.get(clientTokenKey);
+        if (latestTokenObj != null && !token.equals(latestTokenObj.toString())) {
+            log.warn("Token非当前会话，userId：{}", jwtUserId);
+            return writeErrorResponse(response, ResultCodeEnum.TOKEN_REPLACED);
+        }
         
         // 校验通过，将用户ID存入request，方便后续业务使用
         request.setAttribute("userId", jwtUserId);

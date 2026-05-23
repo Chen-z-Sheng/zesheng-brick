@@ -44,7 +44,7 @@
       </el-table-column>
       <el-table-column label="物流公司 / 单号" min-width="160" show-overflow-tooltip>
         <template #default="{ row }">
-          {{ row.logisticsCompany && row.logisticsNo ? `${row.logisticsCompany} ${row.logisticsNo}` : '-' }}
+          {{ row.logisticsCompany && row.logisticsNos?.length ? `${row.logisticsCompany} ${formatExpressNosDisplay({ logisticsNos: row.logisticsNos })}` : '-' }}
         </template>
       </el-table-column>
       <el-table-column prop="storage" label="是否寄存" width="90" align="center">
@@ -115,6 +115,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getSellOrderSubmissions } from '@/api/sell-order-submissions'
+import { formatExpressNosDisplay } from '@/utils/expressNo'
 const router = useRouter()
 
 const DEBOUNCE_MS = 600

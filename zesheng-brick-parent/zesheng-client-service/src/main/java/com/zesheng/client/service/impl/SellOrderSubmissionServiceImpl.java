@@ -10,6 +10,7 @@ import com.zesheng.client.mapper.SellOrderSubmissionMapper;
 import com.zesheng.client.mapper.UserSenderMapper;
 import com.zesheng.client.service.ISellOrderSubmissionService;
 import com.zesheng.common.response.R;
+import com.zesheng.common.util.ExpressNoSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,7 +51,10 @@ public class SellOrderSubmissionServiceImpl implements ISellOrderSubmissionServi
         String senderName = extractString(payload, "sender", "name");
         String senderPhone = extractString(payload, "sender", "phone");
         String logisticsCompany = extractString(payload, "logistics", "company");
-        String logisticsNo = extractString(payload, "logistics", "no");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> logisticsMap = payload.get("logistics") instanceof Map
+                ? (Map<String, Object>) payload.get("logistics") : null;
+        List<String> logisticsNos = ExpressNoSupport.readNosFromSellLogistics(logisticsMap);
         int storage = parseStorage(payload.get("storage"));
         String remark = payload.containsKey("remark") ? String.valueOf(payload.get("remark")).trim() : null;
         if (remark != null && remark.isEmpty()) {
@@ -60,7 +64,7 @@ public class SellOrderSubmissionServiceImpl implements ISellOrderSubmissionServi
         if (!StringUtils.hasText(senderName) || !StringUtils.hasText(senderPhone)) {
             return R.error("请填写寄件人姓名和手机号");
         }
-        if (!StringUtils.hasText(logisticsCompany) || !StringUtils.hasText(logisticsNo)) {
+        if (!StringUtils.hasText(logisticsCompany) || logisticsNos.isEmpty()) {
             return R.error("请填写物流公司和寄件单号");
         }
 
@@ -92,7 +96,7 @@ public class SellOrderSubmissionServiceImpl implements ISellOrderSubmissionServi
         main.setSenderName(senderName.trim());
         main.setSenderPhone(senderPhone.trim());
         main.setLogisticsCompany(logisticsCompany.trim());
-        main.setLogisticsNo(logisticsNo.trim());
+        main.setLogisticsNo(ExpressNoSupport.joinStored(logisticsNos));
         main.setStorage(storage);
         main.setStorageDate(storage == 1 ? LocalDate.now() : null);
         main.setRemark(remark);
@@ -115,7 +119,11 @@ public class SellOrderSubmissionServiceImpl implements ISellOrderSubmissionServi
         wrapper.isNull(SellOrderSubmission::getDeletedAt);
         applyStatusTab(wrapper, statusTab);
         wrapper.orderByDesc(SellOrderSubmission::getUpdatedAt);
-        return sellOrderSubmissionMapper.selectPage(page, wrapper);
+        IPage<SellOrderSubmission> result = sellOrderSubmissionMapper.selectPage(page, wrapper);
+        if (result.getRecords() != null) {
+            result.getRecords().forEach(SellOrderSubmissionServiceImpl::enrichLogisticsNos);
+        }
+        return result;
     }
 
     private void applyStatusTab(LambdaQueryWrapper<SellOrderSubmission> wrapper, String statusTab) {
@@ -162,10 +170,19 @@ public class SellOrderSubmissionServiceImpl implements ISellOrderSubmissionServi
     @Transactional(readOnly = true)
     public SellOrderSubmission getMyById(Long userId, Long id) {
         if (userId == null || id == null) return null;
-        return sellOrderSubmissionMapper.selectOne(new LambdaQueryWrapper<SellOrderSubmission>()
+        SellOrderSubmission row = sellOrderSubmissionMapper.selectOne(new LambdaQueryWrapper<SellOrderSubmission>()
                 .eq(SellOrderSubmission::getId, id)
                 .eq(SellOrderSubmission::getUserId, userId)
                 .isNull(SellOrderSubmission::getDeletedAt));
+        enrichLogisticsNos(row);
+        return row;
+    }
+
+    private static void enrichLogisticsNos(SellOrderSubmission row) {
+        if (row == null) {
+            return;
+        }
+        row.setLogisticsNos(ExpressNoSupport.splitStored(row.getLogisticsNo()));
     }
 
     private static int parseStorage(Object v) {

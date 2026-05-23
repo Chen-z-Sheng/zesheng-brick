@@ -36,7 +36,7 @@
       indicator-active-color="#ffffff"
     >
       <swiper-item wx:for="{{bannerList}}" wx:key="*this">
-        <image src="{{item}}" mode="aspectFill" class="banner-image"></image>
+        <image src="{{item}}" mode="aspectFill" class="banner-image" binderror="onImageError" data-index="{{index}}"></image>
       </swiper-item>
     </swiper>
   </view>
@@ -114,8 +114,23 @@
         <text class="contact-icon">💬</text>
       </view>
       <view class="contact-info">
-        <text class="contact-label">微信联系方式</text>
+        <text class="contact-label">撸货答疑｜进群教学</text>
         <text class="contact-value">{{contact ? contact : '暂未配置'}}</text>
+      </view>
+    </view>
+    <view class="contact-copy-btn">
+      <text class="contact-copy-text">复制</text>
+    </view>
+  </view>
+
+  <view class="contact-card" bindtap="copyContact" data-contact="{{businessContact}}">
+    <view class="contact-card-left">
+      <view class="contact-icon-wrap">
+        <text class="contact-icon">💬</text>
+      </view>
+      <view class="contact-info">
+        <text class="contact-label">同款小程序｜商务合作</text>
+        <text class="contact-value">{{businessContact ? businessContact : '暂未配置'}}</text>
       </view>
     </view>
     <view class="contact-copy-btn">

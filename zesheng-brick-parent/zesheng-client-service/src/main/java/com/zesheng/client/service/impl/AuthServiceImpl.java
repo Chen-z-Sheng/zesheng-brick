@@ -103,6 +103,9 @@ public class AuthServiceImpl implements IAuthService {
     private static final String DEFAULT_AVATAR = "https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0";
     private static final String SMS_CODE_KEY_PREFIX = "client:sms:code:";
     private static final String SMS_INTERVAL_KEY_PREFIX = "client:sms:interval:";
+    private static final String CLIENT_TOKEN_KEY_PREFIX = "client:token:";
+    private static final String CLIENT_REFRESH_TOKEN_KEY_PREFIX = "client:refreshToken:";
+    private static final String USER_TOKEN_MAP_PREFIX = "user:token:map:";
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -225,14 +228,46 @@ public class AuthServiceImpl implements IAuthService {
         }
     }
 
+    /**
+     * 撤销小程序用户当前会话（新登录前 / 退出登录时调用）
+     */
+    private void revokeClientSession(Long userId) {
+        if (userId == null) {
+            return;
+        }
+        revokeAccessTokenMapping(userId);
+        redisUtil.delete(CLIENT_TOKEN_KEY_PREFIX + userId);
+        redisUtil.delete(CLIENT_REFRESH_TOKEN_KEY_PREFIX + userId);
+    }
+
+    /**
+     * 仅撤销当前 access token 的 Redis 映射（刷新 token 换证时使用）
+     */
+    private void revokeAccessTokenMapping(Long userId) {
+        if (userId == null) {
+            return;
+        }
+        Object oldAccessToken = redisUtil.get(CLIENT_TOKEN_KEY_PREFIX + userId);
+        if (oldAccessToken != null) {
+            redisUtil.delete(USER_TOKEN_MAP_PREFIX + oldAccessToken.toString());
+        }
+    }
+
+    /**
+     * 写入小程序单设备会话：每用户仅保留一对 access / refresh
+     */
+    private void persistClientTokens(Long userId, String accessToken, String refreshToken) {
+        redisUtil.set(CLIENT_TOKEN_KEY_PREFIX + userId, accessToken, TOKEN_EXPIRE_HOURS, TimeUnit.HOURS);
+        redisUtil.set(CLIENT_REFRESH_TOKEN_KEY_PREFIX + userId, refreshToken, TOKEN_EXPIRE_DAYS, TimeUnit.DAYS);
+        redisUtil.set(USER_TOKEN_MAP_PREFIX + accessToken, userId, TOKEN_EXPIRE_HOURS, TimeUnit.HOURS);
+    }
+
     private WxLoginResponse issueTokensAndBuildResponse(User user, boolean isNewUser) {
+        revokeClientSession(user.getId());
+
         String token = jwtUtil.generateToken(user.getId(), user.getNickName());
         String refreshToken = jwtUtil.generateRefreshToken(user.getId(), user.getNickName());
-        String redisKey = "client:token:" + user.getId();
-        redisUtil.set(redisKey, token, TOKEN_EXPIRE_HOURS, TimeUnit.HOURS);
-        String refreshTokenKey = "client:refreshToken:" + user.getId();
-        redisUtil.set(refreshTokenKey, refreshToken, 7, TimeUnit.DAYS);
-        redisUtil.set("user:token:map:" + token, user.getId(), TOKEN_EXPIRE_HOURS, TimeUnit.HOURS);
+        persistClientTokens(user.getId(), token, refreshToken);
 
         WxLoginResponse response = new WxLoginResponse();
         response.setToken(token);
@@ -595,27 +630,19 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public R<Void> logout(String token) {
-        if (token != null && !token.isEmpty()) {
-            try {
-                // 从token中解析claims获取userId
-                Claims claims = jwtUtil.parseToken(token);
-                Object userIdObj = claims.get("userId");
-                if (userIdObj != null) {
-                    Long userId = Long.valueOf(userIdObj.toString());
-                    // 删除Redis中的token
-                    String redisKey = "client:token:" + userId;
-                    redisUtil.delete(redisKey);
-                    // 删除Redis中的刷新token
-                    String refreshTokenKey = "client:refreshToken:" + userId;
-                    redisUtil.delete(refreshTokenKey);
-                    redisUtil.delete("user:token:map:" + token);
-                }
-                // 将token加入黑名单（可选）
-                String blacklistKey = "client:token:blacklist:" + token;
-                redisUtil.set(blacklistKey, "1", TOKEN_EXPIRE_DAYS, TimeUnit.DAYS);
-            } catch (Exception e) {
-                log.error("退出登录异常", e);
+        if (!StringUtils.hasText(token)) {
+            return R.success();
+        }
+        try {
+            Claims claims = jwtUtil.parseToken(token);
+            Object userIdObj = claims.get("userId");
+            if (userIdObj != null) {
+                Long userId = Long.valueOf(userIdObj.toString());
+                revokeClientSession(userId);
             }
+            redisUtil.delete(USER_TOKEN_MAP_PREFIX + token);
+        } catch (Exception e) {
+            log.error("退出登录异常", e);
         }
         return R.success();
     }
@@ -637,22 +664,18 @@ public class AuthServiceImpl implements IAuthService {
             Long userId = Long.valueOf(userIdObj.toString());
             String username = usernameObj.toString();
 
-            // 验证刷新token是否在Redis中存在
-            String refreshTokenKey = "client:refreshToken:" + userId;
+            // 验证刷新 token 是否为当前会话
+            String refreshTokenKey = CLIENT_REFRESH_TOKEN_KEY_PREFIX + userId;
             String storedRefreshToken = (String) redisUtil.get(refreshTokenKey);
             if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
                 return R.error("刷新令牌已过期或已被注销");
             }
 
-            // 生成新的访问token和刷新token
+            revokeAccessTokenMapping(userId);
+
             String newToken = jwtUtil.generateToken(userId, username);
             String newRefreshToken = jwtUtil.generateRefreshToken(userId, username);
-
-            // 更新Redis中的token
-            String tokenKey = "client:token:" + userId;
-            redisUtil.set(tokenKey, newToken, TOKEN_EXPIRE_HOURS, TimeUnit.HOURS);
-            redisUtil.set(refreshTokenKey, newRefreshToken, 7, TimeUnit.DAYS);
-            redisUtil.set("user:token:map:" + newToken, userId, TOKEN_EXPIRE_HOURS, TimeUnit.HOURS);
+            persistClientTokens(userId, newToken, newRefreshToken);
 
             // 组装响应
             Map<String, String> result = new HashMap<>();

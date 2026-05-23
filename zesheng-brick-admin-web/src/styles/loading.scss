@@ -3,12 +3,7 @@
  * @description 全局加载动画
  */
 
-@charset "utf-8";
-
-@import "./spinner/dots.css";
-@import "./spinner/gauge.css";
-@import "./spinner/inner-circles.css";
-@import "./spinner/plus.css";
+@use "./variables.scss" as *;
 
 $base-loading: ".vab-loading-type";
 

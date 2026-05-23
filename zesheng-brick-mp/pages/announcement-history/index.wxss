@@ -167,25 +167,6 @@
     color: #b0b0b0;
 }
 
-.detail-close {
-    position: absolute;
-    right: 24rpx;
-    top: 24rpx;
-    width: 48rpx;
-    height: 48rpx;
-    border-radius: 50%;
-    background: #f5f5f5;
-    color: #999999;
-    font-size: 30rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.detail-close:active {
-    background: #ebebeb;
-}
-
 .detail-body {
     margin-top: 24rpx;
     max-height: 50vh;

@@ -13,6 +13,7 @@ import com.zesheng.admin.model.request.SellOrderSubmissionPageRequest;
 import com.zesheng.admin.model.request.SellOrderSubmissionUpdateRequest;
 import com.zesheng.admin.service.ISellOrderSubmissionService;
 import com.zesheng.common.response.R;
+import com.zesheng.common.util.ExpressNoSupport;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,6 +78,7 @@ public class SellOrderSubmissionServiceImpl implements ISellOrderSubmissionServi
         }
         IPage<SellOrderSubmission> result = sellOrderSubmissionMapper.selectPage(page, wrapper);
         result.getRecords().forEach(this::fillDisplayName);
+        result.getRecords().forEach(this::enrichLogisticsNos);
         return result;
     }
 
@@ -85,8 +87,16 @@ public class SellOrderSubmissionServiceImpl implements ISellOrderSubmissionServi
         SellOrderSubmission entity = sellOrderSubmissionMapper.selectById(id);
         if (entity != null) {
             fillDisplayName(entity);
+            enrichLogisticsNos(entity);
         }
         return entity;
+    }
+
+    private void enrichLogisticsNos(SellOrderSubmission entity) {
+        if (entity == null) {
+            return;
+        }
+        entity.setLogisticsNos(ExpressNoSupport.splitStored(entity.getLogisticsNo()));
     }
 
     /**
@@ -127,8 +137,9 @@ public class SellOrderSubmissionServiceImpl implements ISellOrderSubmissionServi
         if (request.getLogisticsCompany() != null) {
             entity.setLogisticsCompany(request.getLogisticsCompany());
         }
-        if (request.getLogisticsNo() != null) {
-            entity.setLogisticsNo(request.getLogisticsNo());
+        if (request.getLogisticsNos() != null) {
+            List<String> nos = ExpressNoSupport.normalizeInputList(request.getLogisticsNos());
+            entity.setLogisticsNo(ExpressNoSupport.joinStored(nos));
         }
         if (request.getStorage() != null) {
             entity.setStorage(request.getStorage());

@@ -1,5 +1,3 @@
 {
-  "dependencies": {
-    "@alicloud/dypnsapi20170525": "2.0.0"
-  }
+  "dependencies": {}
 }

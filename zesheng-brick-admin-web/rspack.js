@@ -15,8 +15,8 @@ process.env.NODE_ENV = mode;
 // 设置webpack特定的环境变量，以避免冲突
 process.env.WEBPACK_ENV = mode;
 process.env.BABEL_ENV = mode;
-// 确保mock始终被启用，即使在生产环境
-process.env.VUE_APP_MOCK_ENABLE = "true";
+process.env.VUE_APP_MOCK_ENABLE =
+  process.env.VUE_APP_USE_MOCK === "true" ? "true" : "false";
 console.log("设置环境变量 NODE_ENV =", process.env.NODE_ENV);
 console.log(
   "设置环境变量 VUE_APP_MOCK_ENABLE =",

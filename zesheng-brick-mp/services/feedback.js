@@ -1,5 +1,4 @@
-const { post } = require('../utils/request');
-const { get } = require('../utils/request');
+const { post, get } = require('../utils/request');
 
 function submitFeedback(payload) {
     return post('/feedback', payload);

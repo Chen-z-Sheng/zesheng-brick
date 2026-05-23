@@ -29,7 +29,7 @@
     </scroll-view>
 
     <!-- 加载中 -->
-    <view class="state-wrapper state-wrapper--outer" wx:if="{{loading}}">
+    <view class="state-wrapper state-wrapper--outer" wx:if="{{pageLoading}}">
         <text class="state-text">行情加载中...</text>
     </view>
 
@@ -41,9 +41,16 @@
     <!-- 二级+三级联动面板 -->
     <view class="category-panel" wx:elif="{{!errorMessage}}">
         <!-- 左侧二级分类 -->
-        <scroll-view class="level2-column" scroll-y show-scrollbar="{{false}}">
+        <scroll-view
+            class="level2-column"
+            scroll-y
+            enhanced
+            show-scrollbar="{{false}}"
+            bindscroll="onLevel2Scroll"
+        >
             <view class="level2-inner">
                 <view
+                    id="level2-{{item.id}}"
                     class="level2-item {{activeLevel2Id == item.id ? 'level2-item--active' : ''}}"
                     wx:for="{{level2Categories}}"
                     wx:key="id"
@@ -57,7 +64,7 @@
         <view class="level3-container">
             <scroll-view class="level3-column" scroll-y="{{level3CanScroll}}" show-scrollbar="{{false}}">
                 <view class="level3-content">
-                    <view class="state-wrapper state-wrapper--inner" wx:if="{{loading}}">
+                    <view class="state-wrapper state-wrapper--inner" wx:if="{{productsLoading}}">
                         <text class="state-text">加载中...</text>
                     </view>
                     <view class="state-wrapper state-wrapper--inner" wx:elif="{{!filteredThirdProducts.length}}">
@@ -99,7 +106,6 @@
                     <text class="history-title">{{selectedProductName}}</text>
                     <view class="history-head-actions">
                         <text class="history-price-badge">￥{{selectedProductPrice}}</text>
-                        <view class="history-head-close" bindtap="onCloseHistory">×</view>
                     </view>
                 </view>
                 <text class="history-subtitle">{{selectedProductDate}} 更新</text>
@@ -110,10 +116,6 @@
                 <canvas type="2d" id="historyChart" class="history-chart"></canvas>
             </view>
             <view class="history-empty" wx:else>暂无历史行情数据</view>
-            <!-- 底部关闭 -->
-            <view class="history-footer">
-                <view class="history-close-btn" bindtap="onCloseHistory">关闭</view>
-            </view>
         </view>
     </view>
 </view>

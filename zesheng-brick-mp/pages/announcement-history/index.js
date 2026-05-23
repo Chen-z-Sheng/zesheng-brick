@@ -1,4 +1,5 @@
 const announcementService = require('../../services/announcement');
+const { getToken } = require('../../utils/storage');
 
 Page({
   data: {
@@ -19,6 +20,10 @@ Page({
 
   async loadAnnouncementList() {
     this.setData({ loading: true });
+    if (!getToken()) {
+      this.setData({ announcementList: [], loading: false });
+      return;
+    }
     try {
       const announcementList = this.sortAnnouncements(await announcementService.getHistoryList());
       this.setData({

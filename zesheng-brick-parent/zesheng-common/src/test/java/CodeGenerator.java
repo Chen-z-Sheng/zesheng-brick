@@ -22,19 +22,19 @@ import java.util.Date;
 public class CodeGenerator {
 
     // ==================================== 【配置参数 - 开始】 ====================================
-    // -------------------------- 数据库连接配置 --------------------------
+    // -------------------------- 数据库连接配置（仅本地生成代码用，勿提交真实生产 RDS 凭据） --------------------------
     /**
      * 数据库连接URL
      */
-    private static final String DB_URL = "jdbc:mysql://rm-bp18l8449ave01weajo.mysql.rds.aliyuncs.com:3306/zesheng_brick?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true";
+    private static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/zesheng_brick?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true";
     /**
      * 数据库用户名
      */
-    private static final String DB_USERNAME = "czs666888fff";
+    private static final String DB_USERNAME = "root";
     /**
      * 数据库密码
      */
-    private static final String DB_PASSWORD = "czk666@@@@@@@@";
+    private static final String DB_PASSWORD = "your-local-mysql-password";
 
     // -------------------------- 模块配置 --------------------------
     /**

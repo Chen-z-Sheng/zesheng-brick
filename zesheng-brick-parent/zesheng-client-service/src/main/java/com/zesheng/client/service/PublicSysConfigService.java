@@ -21,7 +21,8 @@ public class PublicSysConfigService {
 
     private static final Set<String> PUBLIC_CONFIG_KEYS = Set.of(
             "cheap_express_mini_program",
-            "admin_wechat_account");
+            "admin_wechat_account",
+            "business_wechat_account");
 
     private static final String CACHE_KEY_PREFIX = "sys:pub-config:v1:";
     private static final long CACHE_TTL_SECONDS = 180L;

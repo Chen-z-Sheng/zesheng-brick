@@ -2,12 +2,14 @@ package com.zesheng.admin.service;
 
 import com.zesheng.common.dto.logistics.LogisticsTraceVo;
 
+import java.util.List;
+
 /**
  * 管理端查看报单物流轨迹
  */
 public interface AdminLogisticsTraceService {
 
-    LogisticsTraceVo traceSellOrder(Long id);
+    List<LogisticsTraceVo> traceSellOrder(Long id);
 
-    LogisticsTraceVo traceFormSubmission(Long id);
+    List<LogisticsTraceVo> traceFormSubmission(Long id);
 }

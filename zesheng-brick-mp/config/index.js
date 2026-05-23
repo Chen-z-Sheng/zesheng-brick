@@ -1,19 +1,19 @@
 // 环境与基础配置
 const envVersion = wx.getAccountInfoSync ?
   wx.getAccountInfoSync().miniProgram.envVersion :
-  'develop'; // develop | trial | release
+  'develop';
 
 const ENV_MAP = {
   develop: {
-    BASE_URL: 'http://192.168.31.35:9099/api/client', // TODO: 替换为本地/测试域名
+    BASE_URL: 'http://127.0.0.1:9099/api/client',
     TIMEOUT: 15000,
   },
   trial: {
-    BASE_URL: 'http://192.168.31.35:9099/api/client', // TODO: 替换为预发域名
+    BASE_URL: 'https://admin.zesheng.fun/api/client',
     TIMEOUT: 15000,
   },
   release: {
-    BASE_URL: 'http://192.168.31.35:9099/api/client', // TODO: 替换为生产域名
+    BASE_URL: 'https://admin.zesheng.fun/api/client',
     TIMEOUT: 15000,
   },
 };
@@ -38,7 +38,6 @@ module.exports = {
   BASE_URL: baseUrl,
   TIMEOUT: timeout,
   ENV: envVersion,
-  // 客服配置
   CUSTOMER_SERVICE: {
     QR_CODE_URL: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=WeChat%20QR%20code%20for%20customer%20service%2C%20professional%20style%2C%20clear%20image&image_size=square_hd',
     CONTACT_INFO: 'czk666888fff',

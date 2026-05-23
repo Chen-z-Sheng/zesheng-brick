@@ -6,6 +6,9 @@
    CSS 变量定义 - 设计系统核心
    ============================================ */
 page {
+  /* 状态栏高度默认值（刘海屏适配） */
+  --status-bar-height: 20px;
+
   /* 主色调 - 微信蓝渐变系 */
   --primary-color: #07c160;
   --primary-dark: #059669;
@@ -71,15 +74,15 @@ page {
   --space-2xl: 48rpx;
   --space-3xl: 64rpx;
   
-  /* 字体大小 - 微信推荐字体 */
-  --text-xs: 20rpx;
-  --text-sm: 24rpx;
-  --text-base: 28rpx;
-  --text-md: 30rpx;
-  --text-lg: 32rpx;
-  --text-xl: 36rpx;
-  --text-2xl: 40rpx;
-  --text-3xl: 48rpx;
+  /* 字体大小 - 微信推荐字体（使用px保证可读性） */
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-md: 15px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 20px;
+  --text-3xl: 24px;
   
   /* 动画 - 微信推荐时长 */
   --transition-fast: 0.15s;

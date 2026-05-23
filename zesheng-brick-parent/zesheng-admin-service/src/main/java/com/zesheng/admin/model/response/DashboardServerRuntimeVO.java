@@ -15,7 +15,7 @@ public class DashboardServerRuntimeVO {
     @Schema(description = "系统 CPU 使用率 0~100，不可用时为 null")
     private Double systemCpuLoadPercent;
 
-    @Schema(description = "物理内存使用率 0~100，不可用时为 null")
+    @Schema(description = "物理内存使用率 0~100（Linux 按 MemAvailable 计算，与 free/云监控一致），不可用时为 null")
     private Double physicalMemoryUsedPercent;
 
     @Schema(description = "JVM 堆内存使用率 0~100")

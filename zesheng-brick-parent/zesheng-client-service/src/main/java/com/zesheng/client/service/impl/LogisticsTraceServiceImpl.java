@@ -13,6 +13,7 @@ import com.zesheng.common.dto.logistics.LogisticsTraceVo;
 import com.zesheng.common.kuaidi100.Kuaidi100ClientUtil;
 import com.zesheng.common.kuaidi100.Kuaidi100LogisticsQuerySupport;
 import com.zesheng.common.kuaidi100.Kuaidi100TraceAssembler;
+import com.zesheng.common.util.ExpressNoSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -37,37 +38,38 @@ public class LogisticsTraceServiceImpl implements ILogisticsTraceService {
     private final Kuaidi100ClientUtil kuaidi100ClientUtil;
 
     @Override
-    public LogisticsTraceVo traceSellOrderForUser(Long userId, Long submissionId) {
+    public List<LogisticsTraceVo> traceSellOrderForUser(Long userId, Long submissionId) {
         if (userId == null || submissionId == null) {
-            return LogisticsTraceVo.fail("参数错误");
+            return List.of(LogisticsTraceVo.fail("参数错误"));
         }
         SellOrderSubmission row = sellOrderSubmissionMapper.selectById(submissionId);
         if (row == null || row.getDeletedAt() != null || !userId.equals(row.getUserId())) {
-            return LogisticsTraceVo.fail("记录不存在或无权查看");
+            return List.of(LogisticsTraceVo.fail("记录不存在或无权查看"));
         }
-        return Kuaidi100LogisticsQuerySupport.queryTrace(
+        List<String> nos = ExpressNoSupport.splitStored(row.getLogisticsNo());
+        return Kuaidi100LogisticsQuerySupport.queryTraceList(
                 row.getLogisticsCompany(),
-                row.getLogisticsNo(),
+                nos,
                 row.getSenderPhone(),
                 this::resolveByCompanyName,
                 kuaidi100ClientUtil);
     }
 
     @Override
-    public LogisticsTraceVo traceFormSubmissionForUser(Long userId, Long submissionId) {
+    public List<LogisticsTraceVo> traceFormSubmissionForUser(Long userId, Long submissionId) {
         if (userId == null || submissionId == null) {
-            return LogisticsTraceVo.fail("参数错误");
+            return List.of(LogisticsTraceVo.fail("参数错误"));
         }
         FormSubmission row = formSubmissionMapper.selectById(submissionId);
         if (row == null || row.getDeletedAt() != null || !userId.equals(row.getUserId())) {
-            return LogisticsTraceVo.fail("记录不存在或无权查看");
+            return List.of(LogisticsTraceVo.fail("记录不存在或无权查看"));
         }
-        String expressNo = extractExpressNo(row.getDataJson());
+        List<String> expressNos = ExpressNoSupport.readExpressNosFromFormJson(row.getDataJson());
         String companyHint = extractLogisticsCompanyHint(row.getDataJson());
         String senderPhone = extractSenderPhone(row.getDataJson());
-        return Kuaidi100LogisticsQuerySupport.queryTrace(
+        return Kuaidi100LogisticsQuerySupport.queryTraceList(
                 companyHint,
-                expressNo,
+                expressNos,
                 senderPhone,
                 this::resolveByCompanyName,
                 kuaidi100ClientUtil);
@@ -86,11 +88,11 @@ public class LogisticsTraceServiceImpl implements ILogisticsTraceService {
                 continue;
             }
             String key = it.type().trim().toLowerCase() + "-" + it.id();
-            LogisticsTraceVo full;
+            List<LogisticsTraceVo> fullList;
             if ("sell".equalsIgnoreCase(it.type())) {
-                full = traceSellOrderForUser(userId, it.id());
+                fullList = traceSellOrderForUser(userId, it.id());
             } else if ("form".equalsIgnoreCase(it.type())) {
-                full = traceFormSubmissionForUser(userId, it.id());
+                fullList = traceFormSubmissionForUser(userId, it.id());
             } else {
                 LogisticsSummaryVo s = new LogisticsSummaryVo();
                 s.setSuccess(false);
@@ -98,7 +100,7 @@ public class LogisticsTraceServiceImpl implements ILogisticsTraceService {
                 out.put(key, s);
                 continue;
             }
-            out.put(key, full.toSummary());
+            out.put(key, Kuaidi100LogisticsQuerySupport.pickPrimaryTrace(fullList).toSummary());
         }
         return out;
     }
@@ -123,21 +125,6 @@ public class LogisticsTraceServiceImpl implements ILogisticsTraceService {
             return Optional.of(Kuaidi100TraceAssembler.normalizeComCode(candidates.get(0).getCode()));
         }
         return Optional.empty();
-    }
-
-    private static String extractExpressNo(Map<String, Object> dataJson) {
-        if (dataJson == null) {
-            return "";
-        }
-        Object v = dataJson.get("expressNo");
-        if (v == null) {
-            v = dataJson.get("express_no");
-        }
-        if (v == null) {
-            return "";
-        }
-        String s = String.valueOf(v).trim();
-        return s;
     }
 
     private static String extractLogisticsCompanyHint(Map<String, Object> dataJson) {

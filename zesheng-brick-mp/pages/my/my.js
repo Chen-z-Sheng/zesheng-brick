@@ -5,6 +5,11 @@ const { getOrderStats } = require('../../services/order');
 const { getPaymentInfoByUserId } = require('../../services/payment-info');
 const config = require('../../config/index');
 const configService = require('../../services/config');
+const {
+    buildShareAppMessagePayload,
+    buildShareTimelinePayload,
+    showShareMenuForPage,
+} = require('../../utils/page-share');
 
 /**
  * 解析 sys_config 中小程序跳转配置：JSON 支持 appId / AppId 与 path；或纯 appId 字符串
@@ -47,7 +52,6 @@ Page({
     data: {
         userInfo: {},
         avatarDisplayUrl: 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0',
-        contact: 'czk666888fff',
         paymentInfo: '',
         orderStats: {
             total: 0,
@@ -76,7 +80,7 @@ Page({
     buildAvatarDisplayUrl(userInfo, forceRefresh) {
         const rawUrl = this.getRawAvatarUrl(userInfo);
         if (!rawUrl) {
-            return '/images/icon/my.png';
+            return DEFAULT_AVATAR;
         }
         if (!forceRefresh) {
             return rawUrl;
@@ -92,17 +96,21 @@ Page({
         });
     },
 
-    /**
-     * 生命周期函数--监听页面加载
-     */
+    onShareAppMessage() {
+        return buildShareAppMessagePayload(this);
+    },
+
+    onShareTimeline() {
+        return buildShareTimelinePayload(this);
+    },
+
     onLoad(options) {
+        showShareMenuForPage(this);
         this.loadUserInfo();
     },
 
-    /**
-     * 生命周期函数--监听页面显示
-     */
     onShow() {
+        showShareMenuForPage(this);
         this.loadUserInfo();
     },
 
@@ -347,21 +355,23 @@ Page({
     handleLoginSuccess(e) {
         const userInfo = e.detail.userInfo;
         const { loginSource } = this.data;
-        
-        this.setData({
-            loginModalVisible: false
-        });
-        this.applyUserInfo(userInfo, false);
-        
-        this.loadOrderStats();
-        
-        // 根据登录来源执行相应操作
-        if (loginSource === 'paymentInfo') {
-            wx.navigateTo({
-                url: '/pages/payment-info/payment-info'
+
+        try {
+            this.applyUserInfo(userInfo, false);
+            this.loadOrderStats();
+
+            // 根据登录来源执行相应操作
+            if (loginSource === 'paymentInfo') {
+                wx.navigateTo({
+                    url: '/pages/payment-info/payment-info'
+                });
+            }
+        } finally {
+            // 确保状态清理
+            this.setData({
+                loginModalVisible: false,
+                loginSource: ''
             });
-            // 重置登录来源
-            this.setData({ loginSource: '' });
         }
     },
 
@@ -393,35 +403,7 @@ Page({
         });
     },
 
-    /**
-     * 复制联系方式
-     */
-    copyContact() {
-        const contact = this.data.contact;
-        if (!contact) {
-            wx.showToast({
-                title: '暂无联系方式',
-                icon: 'none'
-            });
-            return;
-        }
 
-        wx.setClipboardData({
-            data: contact,
-            success: () => {
-                wx.showToast({
-                    title: '已复制到剪贴板',
-                    icon: 'success'
-                });
-            },
-            fail: () => {
-                wx.showToast({
-                    title: '复制失败',
-                    icon: 'none'
-                });
-            }
-        });
-    },
 
     /**
      * 跳转关于我
@@ -544,6 +526,15 @@ Page({
                     });
                 }
             }
+        });
+    },
+
+    /**
+     * 头像加载失败时使用默认头像
+     */
+    onAvatarError() {
+        this.setData({
+            avatarDisplayUrl: DEFAULT_AVATAR
         });
     },
 });

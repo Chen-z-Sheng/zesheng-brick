@@ -39,7 +39,6 @@
                 <text class="detail-title">{{activeAnnouncement.title}}</text>
                 <text wx:if="{{activeAnnouncement.status === 1}}" class="announcement-status">当前</text>
             </view>
-            <view class="detail-close" bindtap="closeDetail">×</view>
             <text class="detail-time">发布时间：{{activeAnnouncement.createdAtText}}</text>
             <scroll-view scroll-y="true" class="detail-body">
                 <view class="detail-content-wrap">

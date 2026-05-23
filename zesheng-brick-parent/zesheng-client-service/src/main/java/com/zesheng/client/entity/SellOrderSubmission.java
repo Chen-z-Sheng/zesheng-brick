@@ -35,8 +35,12 @@ public class SellOrderSubmission extends BaseEntity {
     @Schema(description = "物流公司")
     private String logisticsCompany;
 
-    @Schema(description = "寄件单号")
+    @Schema(description = "寄件单号（多个以英文逗号存储）")
     private String logisticsNo;
+
+    @TableField(exist = false)
+    @Schema(description = "寄件单号列表（接口返回）")
+    private List<String> logisticsNos;
 
     @Schema(description = "是否寄存：0=否 1=是")
     private Integer storage;

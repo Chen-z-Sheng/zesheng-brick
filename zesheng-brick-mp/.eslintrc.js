@@ -13,7 +13,7 @@ module.exports = {
     modules: true,
   },
   parserOptions: {
-    ecmaVersion: 2018,
+    ecmaVersion: 2020,
     sourceType: 'module',
   },
   globals: {
@@ -34,4 +34,4 @@ module.exports = {
     'semi': ['error', 'always'],
     'quotes': ['error', 'single', { avoidEscape: true }],
   },
-}
+};

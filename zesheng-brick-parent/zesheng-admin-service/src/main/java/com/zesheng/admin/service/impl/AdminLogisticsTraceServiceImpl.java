@@ -12,6 +12,7 @@ import com.zesheng.common.dto.logistics.LogisticsTraceVo;
 import com.zesheng.common.kuaidi100.Kuaidi100ClientUtil;
 import com.zesheng.common.kuaidi100.Kuaidi100LogisticsQuerySupport;
 import com.zesheng.common.kuaidi100.Kuaidi100TraceAssembler;
+import com.zesheng.common.util.ExpressNoSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -30,36 +31,37 @@ public class AdminLogisticsTraceServiceImpl implements AdminLogisticsTraceServic
     private final Kuaidi100ClientUtil kuaidi100ClientUtil;
 
     @Override
-    public LogisticsTraceVo traceSellOrder(Long id) {
+    public List<LogisticsTraceVo> traceSellOrder(Long id) {
         if (id == null) {
-            return LogisticsTraceVo.fail("参数错误");
+            return List.of(LogisticsTraceVo.fail("参数错误"));
         }
         SellOrderSubmission row = sellOrderSubmissionMapper.selectById(id);
         if (row == null) {
-            return LogisticsTraceVo.fail("记录不存在");
+            return List.of(LogisticsTraceVo.fail("记录不存在"));
         }
-        return Kuaidi100LogisticsQuerySupport.queryTrace(
+        List<String> nos = ExpressNoSupport.splitStored(row.getLogisticsNo());
+        return Kuaidi100LogisticsQuerySupport.queryTraceList(
                 row.getLogisticsCompany(),
-                row.getLogisticsNo(),
+                nos,
                 row.getSenderPhone(),
                 this::resolveByCompanyName,
                 kuaidi100ClientUtil);
     }
 
     @Override
-    public LogisticsTraceVo traceFormSubmission(Long id) {
+    public List<LogisticsTraceVo> traceFormSubmission(Long id) {
         if (id == null) {
-            return LogisticsTraceVo.fail("参数错误");
+            return List.of(LogisticsTraceVo.fail("参数错误"));
         }
         FormSubmission row = formSubmissionMapper.selectById(id);
         if (row == null) {
-            return LogisticsTraceVo.fail("记录不存在");
+            return List.of(LogisticsTraceVo.fail("记录不存在"));
         }
-        String expressNo = extractExpressNo(row.getDataJson());
+        List<String> expressNos = ExpressNoSupport.readExpressNosFromFormJson(row.getDataJson());
         String companyHint = extractLogisticsCompanyHint(row.getDataJson());
-        return Kuaidi100LogisticsQuerySupport.queryTrace(
+        return Kuaidi100LogisticsQuerySupport.queryTraceList(
                 companyHint,
-                expressNo,
+                expressNos,
                 null,
                 this::resolveByCompanyName,
                 kuaidi100ClientUtil);
@@ -85,20 +87,6 @@ public class AdminLogisticsTraceServiceImpl implements AdminLogisticsTraceServic
             return Optional.of(Kuaidi100TraceAssembler.normalizeComCode(candidates.get(0).getCode()));
         }
         return Optional.empty();
-    }
-
-    private static String extractExpressNo(Map<String, Object> dataJson) {
-        if (dataJson == null) {
-            return "";
-        }
-        Object v = dataJson.get("expressNo");
-        if (v == null) {
-            v = dataJson.get("express_no");
-        }
-        if (v == null) {
-            return "";
-        }
-        return String.valueOf(v).trim();
     }
 
     private static String extractLogisticsCompanyHint(Map<String, Object> dataJson) {

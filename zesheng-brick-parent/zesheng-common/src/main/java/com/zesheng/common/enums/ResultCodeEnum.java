@@ -37,6 +37,7 @@ public enum ResultCodeEnum implements Serializable {
     USER_DISABLED(10003, "账号已禁用"),
     TOKEN_EXPIRED(10004, "token已过期"),
     TOKEN_INVALID(10005, "token无效"),
+    TOKEN_REPLACED(10006, "账号已在其他设备登录，请重新登录"),
 
     // ========== 配置模块（20000段） ==========
 

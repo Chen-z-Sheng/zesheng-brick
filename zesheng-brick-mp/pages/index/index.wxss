@@ -242,6 +242,10 @@
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
 }
 
+.contact-card + .contact-card {
+  margin-top: 16rpx;
+}
+
 .contact-card:active {
   background: #fafafa;
 }

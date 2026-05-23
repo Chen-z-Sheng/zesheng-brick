@@ -10,12 +10,6 @@ import { title } from "@/config";
 import { applyThemeBodyClassFromStorage } from "@/utils/applyThemeBodyClass";
 import { mockXHR } from "@/utils/static";
 
-import ElementPlus from "element-plus";
-import "element-plus/dist/index.css";
-
-import formCreate from "@form-create/element-ui";
-import FcDesigner from "@form-create/designer";
-
 const ignoreErrors = [
   "ResizeObserver loop completed with undelivered notifications",
   "ResizeObserver loop limit exceeded"
@@ -60,14 +54,8 @@ app.config.globalProperties.$baseTitle = title;
 window.$eventBus = eventBus;
 window.$baseTitle = title;
 
-if (process.env.NODE_ENV === "production") {
+if (process.env.VUE_APP_USE_MOCK === "true") {
   mockXHR();
-  console.log("生产环境已启用Mock拦截，所有接口请求将被Mock拦截");
 }
-app.use(ElementPlus);
-
-app.use(formCreate);
-app.use(FcDesigner);
-
 applyThemeBodyClassFromStorage();
 app.mount("#vue-admin-better");

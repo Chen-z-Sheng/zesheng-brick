@@ -17,14 +17,12 @@ function unwrapApiData(payload) {
   return payload;
 }
 
-const submitOrder = (payload) => request.post('/orders', payload, { showLoading: true });
-
 const saveFormSubmission = (payload) => {
   return post('/form-submissions', payload);
 };
 
 /** 提交行情报单（出售报单），返回提交记录 id */
-const submitSellOrder = (payload) => request.post('/sell-order-submissions', payload);
+const submitSellOrder = (payload) => post('/sell-order-submissions', payload);
 
 /** 订单统计（固结+行情），返回 { total, shipped, storing, completed, exception } */
 const getOrderStats = () => get('/my/order-stats');
@@ -65,7 +63,6 @@ const getSellLogisticsTrace = (id) =>
   get(`/sell-order-submissions/${id}/logistics-trace`, {}, { showLoading: false }).then(unwrapApiData);
 
 module.exports = {
-  submitOrder,
   saveFormSubmission,
   submitSellOrder,
   getOrderStats,

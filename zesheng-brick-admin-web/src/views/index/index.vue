@@ -241,8 +241,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
-import VabChart from '@/plugins/echarts'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, reactive, ref } from 'vue'
+
+const VabChart = defineAsyncComponent(() => import('@/plugins/echarts'))
 import { dependencies, devDependencies } from '../../../package.json'
 import { getDashboardOverview, getDashboardServerRuntime } from '@/api/dashboard'
 import { ElMessage } from 'element-plus'

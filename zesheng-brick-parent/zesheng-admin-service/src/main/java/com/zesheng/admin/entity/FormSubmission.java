@@ -41,7 +41,7 @@ public class FormSubmission extends BaseEntity {
     private BigDecimal unitPrice;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
-    @Schema(description = "表单扩展数据：giftDesc/expressNo/orderNoMain/orderNoGift/imageUrls/signDate/remark")
+    @Schema(description = "表单扩展数据：giftDesc/expressNos/orderNoMain/orderNoGift/imageUrls/signDate/remark")
     private Map<String, Object> dataJson;
 
     @Schema(description = "提交数量")

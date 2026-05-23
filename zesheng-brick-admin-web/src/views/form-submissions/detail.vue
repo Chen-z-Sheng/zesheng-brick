@@ -110,7 +110,24 @@
                 <el-input v-model="form.dataJson.giftDesc" placeholder="加赠" clearable />
               </el-form-item>
               <el-form-item label="快递单号">
-                <el-input v-model="form.dataJson.expressNo" placeholder="快递单号" clearable />
+                <div class="express-no-editor">
+                  <div
+                    v-for="(item, index) in expressNoList"
+                    :key="index"
+                    class="express-no-row"
+                  >
+                    <el-input v-model="item.no" placeholder="快递单号" clearable />
+                    <el-button
+                      v-if="expressNoList.length > 1"
+                      type="danger"
+                      link
+                      @click="removeExpressNo(index)"
+                    >
+                      删除
+                    </el-button>
+                  </div>
+                  <el-button type="primary" link @click="addExpressNo">+ 添加快递单号</el-button>
+                </div>
               </el-form-item>
               <el-form-item label="主品单号">
                 <el-input v-model="form.dataJson.orderNoMain" placeholder="主品单号" clearable />
@@ -149,23 +166,26 @@
           <section v-if="detail" class="panel full-width">
             <div class="section-title">物流轨迹</div>
             <div v-if="logisticsLoading" class="logistics-muted">正在查询物流…</div>
-            <template v-else-if="logisticsTrace">
-              <div v-if="logisticsTrace.success" class="logistics-head">
-                <el-tag type="primary" size="small">{{ logisticsTrace.stateText }}</el-tag>
-                <span v-if="logisticsTrace.lastTime" class="logistics-time">{{ logisticsTrace.lastTime }}</span>
+            <template v-else-if="logisticsTraceList.length">
+              <div v-for="(trace, traceIdx) in logisticsTraceList" :key="traceIdx" class="logistics-multi-block">
+                <div class="logistics-multi-title">{{ trace.trackingNo || `快递单号 ${traceIdx + 1}` }}</div>
+                <div v-if="trace.success" class="logistics-head">
+                  <el-tag type="primary" size="small">{{ trace.stateText }}</el-tag>
+                  <span v-if="trace.lastTime" class="logistics-time">{{ trace.lastTime }}</span>
+                </div>
+                <p v-if="trace.success" class="logistics-latest">{{ trace.lastInfo || '—' }}</p>
+                <el-alert v-else type="warning" :closable="false" show-icon :title="trace.errorMessage || '暂无物流'" />
+                <el-timeline v-if="trace.success && trace.traces?.length" class="logistics-timeline">
+                  <el-timeline-item
+                    v-for="(row, idx) in trace.traces"
+                    :key="idx"
+                    :timestamp="row.time"
+                    placement="top"
+                  >
+                    {{ row.context }}
+                  </el-timeline-item>
+                </el-timeline>
               </div>
-              <p v-if="logisticsTrace.success" class="logistics-latest">{{ logisticsTrace.lastInfo || '—' }}</p>
-              <el-alert v-else type="warning" :closable="false" show-icon :title="logisticsTrace.errorMessage || '暂无物流'" />
-              <el-timeline v-if="logisticsTrace.success && logisticsTrace.traces?.length" class="logistics-timeline">
-                <el-timeline-item
-                  v-for="(row, idx) in logisticsTrace.traces"
-                  :key="idx"
-                  :timestamp="row.time"
-                  placement="top"
-                >
-                  {{ row.context }}
-                </el-timeline-item>
-              </el-timeline>
             </template>
           </section>
 
@@ -211,6 +231,11 @@ import {
   removeSettledProof as apiRemoveSettledProof
 } from '@/api/form-submissions'
 import UserPaymentInfoDialog from '@/components/UserPaymentInfoDialog/index.vue'
+import {
+  createEmptyExpressItem,
+  normalizeExpressNoList,
+  collectExpressNos,
+} from '@/utils/expressNo'
 
 // 后端 R 包装：取 res.data 为实体
 function unwrap(res) {
@@ -223,7 +248,8 @@ const id = ref(route.query.id)
 const detail = ref(null)
 const loading = ref(false)
 const saving = ref(false)
-const logisticsTrace = ref(null)
+const logisticsTraceList = ref([])
+const expressNoList = ref([createEmptyExpressItem()])
 const logisticsLoading = ref(false)
 const paymentDialogVisible = ref(false)
 const form = ref({
@@ -234,7 +260,6 @@ const form = ref({
   adminInternalNote: '',
   dataJson: {
     giftDesc: '',
-    expressNo: '',
     orderNoMain: '',
     orderNoGift: '',
     signDate: '',
@@ -302,6 +327,24 @@ function formatTime(v) {
   }
 }
 
+function addExpressNo() {
+  expressNoList.value.push(createEmptyExpressItem())
+}
+
+function removeExpressNo(index) {
+  if (expressNoList.value.length <= 1) {
+    expressNoList.value = [createEmptyExpressItem()]
+    return
+  }
+  expressNoList.value.splice(index, 1)
+}
+
+function normalizeTraceList(raw) {
+  if (Array.isArray(raw)) return raw
+  if (raw && typeof raw === 'object') return [raw]
+  return []
+}
+
 function syncFormFromDetail() {
   if (!detail.value) return
   const d = detail.value
@@ -321,6 +364,7 @@ function syncFormFromDetail() {
     } catch (_) {}
   }
   const dataJson = d.dataJson && typeof d.dataJson === 'object' ? { ...d.dataJson } : {}
+  expressNoList.value = normalizeExpressNoList({ expressNos: dataJson.expressNos })
   form.value = {
     quantity: d.quantity != null ? d.quantity : 1,
     settledAmount: d.settledAmount != null ? Number(d.settledAmount) : null,
@@ -329,7 +373,6 @@ function syncFormFromDetail() {
     adminInternalNote: d.adminInternalNote ?? '',
     dataJson: {
       giftDesc: dataJson.giftDesc ?? '',
-      expressNo: dataJson.expressNo ?? '',
       orderNoMain: dataJson.orderNoMain ?? '',
       orderNoGift: dataJson.orderNoGift ?? '',
       signDate: dataJson.signDate ?? '',
@@ -343,12 +386,12 @@ function syncFormFromDetail() {
 async function loadLogistics() {
   if (!id.value) return
   logisticsLoading.value = true
-  logisticsTrace.value = null
+  logisticsTraceList.value = []
   try {
     const res = await getFormSubmissionLogisticsTrace(id.value)
-    logisticsTrace.value = unwrap(res)
+    logisticsTraceList.value = normalizeTraceList(unwrap(res))
   } catch {
-    logisticsTrace.value = null
+    logisticsTraceList.value = []
   } finally {
     logisticsLoading.value = false
   }
@@ -375,16 +418,17 @@ async function save() {
   if (!id.value) return
   saving.value = true
   try {
+    const expressNos = collectExpressNos(expressNoList.value)
     const payload = {
       quantity: form.value.quantity,
       settledAmount: form.value.settledAmount != null ? form.value.settledAmount : null,
       status: form.value.status,
       settledAt: form.value.settledAt || null,
       adminInternalNote: form.value.adminInternalNote,
-      dataJson: {
-        giftDesc: form.value.dataJson.giftDesc ?? '',
-        expressNo: form.value.dataJson.expressNo ?? '',
-        orderNoMain: form.value.dataJson.orderNoMain ?? '',
+    dataJson: {
+      giftDesc: form.value.dataJson.giftDesc ?? '',
+      expressNos,
+      orderNoMain: form.value.dataJson.orderNoMain ?? '',
         orderNoGift: form.value.dataJson.orderNoGift ?? '',
         signDate: form.value.dataJson.signDate ?? '',
         remark: form.value.dataJson.remark ?? '',
@@ -550,6 +594,29 @@ onMounted(() => {
 .logistics-timeline {
   margin-top: 8px;
   padding-left: 4px;
+}
+.express-no-editor {
+  width: 100%;
+}
+.express-no-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.express-no-row .el-input {
+  flex: 1;
+}
+.logistics-multi-block + .logistics-multi-block {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+.logistics-multi-title {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 600;
 }
 @media (max-width: 900px) {
   .detail-grid {

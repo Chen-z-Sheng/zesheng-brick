@@ -16,8 +16,8 @@ import { isArray } from "@/utils/validate"
 import { ElLoading, ElMessage } from "element-plus"
 import { pickBy } from "lodash-es"
 
-// 生产环境 mock（保持你的逻辑）
-if (process.env.NODE_ENV === "production") {
+// 仅显式开启 mock 时加载（生产构建务必 VUE_APP_USE_MOCK=false）
+if (process.env.VUE_APP_USE_MOCK === "true") {
   const mockContext = require.context("../../mock/controller", true, /\.js$/)
   mockContext.keys().forEach((key) => {
     const m = mockContext(key)

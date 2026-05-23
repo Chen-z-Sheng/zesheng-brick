@@ -1,7 +1,7 @@
 {
     "navigationBarTitleText": "智能客服",
     "usingComponents": {
-        "chat": "plugin://myPlugin/chat",
+        "chat": "plugin://chatbot/chat",
         "customTextMessage": "../../components/customTextMessage/customTextMessage",
         "customImageMessage": "../../components/customImageMessage/customImageMessage",
         "customQueryMessage": "../../components/customQueryMessage/customQueryMessage",

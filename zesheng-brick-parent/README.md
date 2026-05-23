@@ -24,7 +24,7 @@
 
 - JDK 21+、Maven 3.8+  
 - MySQL、Redis  
-- 开发：将各模块 `application-dev.example.yml` 复制为 **`application-dev.yml`** 并填写密钥（该文件名已在仓库根 `.gitignore` 中忽略）；也可用环境变量覆盖示例里的占位符（**勿将生产密钥提交仓库**）
+- 开发：在各模块 `src/main/resources/` 下自建 **`application-dev.yml`**（已在仓库根 `.gitignore` 中忽略，勿提交）；配置项可参考 `application-prod.yml`，密钥仅写在本地该文件或环境变量中
 
 ## 数据库脚本路径
 

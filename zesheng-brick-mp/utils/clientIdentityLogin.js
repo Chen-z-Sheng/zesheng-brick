@@ -12,6 +12,7 @@ function getInitialData() {
     return {
         identityMode: 'legacy',
         agreeOperator: false,
+        agreePlatform: false,
         phoneMask: '获取中…',
         nativeOneClickReady: false,
         smsPhone: '',
@@ -55,6 +56,27 @@ function onAgreeOperatorChange(ctx, e) {
     ctx.setData({ agreeOperator: vals.indexOf('agree') >= 0 });
 }
 
+function onAgreePlatformChange(ctx, e) {
+    const vals = e.detail.value || [];
+    ctx.setData({ agreePlatform: vals.indexOf('agree') >= 0 });
+}
+
+function ensureAgreePlatform(ctx) {
+    if (!ctx.data.agreePlatform) {
+        wx.showToast({ title: '请先阅读并勾选同意相关协议', icon: 'none' });
+        return false;
+    }
+    return true;
+}
+
+function openPlatformDoc(e) {
+    const which = (e.currentTarget.dataset || {}).which || 'user';
+    const type = which === 'privacy' ? 'privacy' : 'user';
+    wx.navigateTo({
+        url: `/pages/legal-doc/legal-doc?type=${type}`
+    });
+}
+
 function openCarrierDoc(e) {
     const which = (e.currentTarget.dataset || {}).which || 'cm';
     const url = CARRIER_LINKS[which] || CARRIER_LINKS.cm;
@@ -74,6 +96,9 @@ function wxLoginPromise() {
 
 async function onPhoneOneClick(ctx, e, onSuccess) {
     if (ctx.data.loading) {
+        return;
+    }
+    if (!ensureAgreePlatform(ctx)) {
         return;
     }
     const d = e.detail || {};
@@ -104,6 +129,9 @@ function onSmsCodeInput(ctx, e) {
 
 async function submitSmsLogin(ctx, onSuccess) {
     if (ctx.data.loading) {
+        return;
+    }
+    if (!ensureAgreePlatform(ctx)) {
         return;
     }
     const phone = (ctx.data.smsPhone || '').trim();
@@ -191,6 +219,9 @@ async function onPhoneQuickLogin(ctx, e, onSuccess) {
     if (ctx.data.loading) {
         return;
     }
+    if (!ensureAgreePlatform(ctx)) {
+        return;
+    }
     const detail = e.detail || {};
     if (detail.errMsg && detail.errMsg.indexOf('getPhoneNumber:ok') === -1) {
         if (detail.errMsg.indexOf('deny') !== -1 || detail.errMsg.indexOf('cancel') !== -1) {
@@ -200,7 +231,7 @@ async function onPhoneQuickLogin(ctx, e, onSuccess) {
     }
     const phoneCode = detail.code;
     if (!phoneCode) {
-        wx.showToast({ title: '请升级微信版本后重试', icon: 'none' });
+        wx.showToast({ title: '请升级客户端版本后重试', icon: 'none' });
         return;
     }
     ctx.setData({ loading: true });
@@ -238,6 +269,9 @@ module.exports = {
     syncIdentityMode,
     refreshPhoneMask,
     onAgreeOperatorChange,
+    onAgreePlatformChange,
+    openPlatformDoc,
+    ensureAgreePlatform,
     openCarrierDoc,
     onPhoneOneClick,
     onSendSmsDone,

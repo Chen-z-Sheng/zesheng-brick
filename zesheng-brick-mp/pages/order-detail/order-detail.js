@@ -1,4 +1,5 @@
 const { getFormSubmissionDetail, getSellOrderDetail, getFormLogisticsTrace, getSellLogisticsTrace } = require('../../services/order');
+const { formatExpressNosDisplay } = require('../../utils/order-form-shared');
 
 const STATUS_TEXT = {
     0: '草稿',
@@ -16,6 +17,16 @@ function formatDateTime(str) {
     return String(str).replace('T', ' ').substring(0, 19);
 }
 
+function normalizeTraceList(raw) {
+    if (Array.isArray(raw)) {
+        return raw;
+    }
+    if (raw && typeof raw === 'object') {
+        return [raw];
+    }
+    return [];
+}
+
 Page({
     data: {
         type: 'form',
@@ -28,10 +39,12 @@ Page({
         createdAt: '',
         updatedAt: '',
         proofUrls: [],
-        dataJsonLabels: {},
-        logisticsTrace: null,
+        dataJsonLabels: [],
+        expressNoDisplay: '',
+        logisticsNoDisplay: '',
+        logisticsTraceList: [],
         logisticsLoading: false,
-        logisticsExpanded: false,
+        logisticsExpandedMap: {},
         enableLogisticsTrace: false
     },
 
@@ -70,36 +83,52 @@ Page({
     loadLogistics(type, id, detail) {
         const enable = this.computeEnableLogisticsTrace(type, detail);
         if (!enable) {
-            this.setData({ logisticsLoading: false, logisticsTrace: null, logisticsExpanded: false, enableLogisticsTrace: false });
+            this.setData({
+                logisticsLoading: false,
+                logisticsTraceList: [],
+                logisticsExpandedMap: {},
+                enableLogisticsTrace: false
+            });
             return;
         }
-        this.setData({ enableLogisticsTrace: true, logisticsLoading: true, logisticsTrace: null, logisticsExpanded: false });
+        this.setData({ enableLogisticsTrace: true, logisticsLoading: true, logisticsTraceList: [], logisticsExpandedMap: {} });
         const api = type === 'form' ? getFormLogisticsTrace(id) : getSellLogisticsTrace(id);
         api
             .then((trace) => {
-                this.setData({ logisticsTrace: trace || null, logisticsLoading: false });
+                const list = normalizeTraceList(trace);
+                this.setData({
+                    logisticsTraceList: list.length
+                        ? list
+                        : [{ success: false, errorMessage: '暂无物流信息' }],
+                    logisticsLoading: false
+                });
             })
-            .catch(() => {
-                this.setData({ logisticsTrace: null, logisticsLoading: false });
+            .catch((err) => {
+                const msg = (err && err.message) || (err && err.msg) || '物流查询失败，请稍后重试';
+                this.setData({
+                    logisticsTraceList: [{ success: false, errorMessage: msg }],
+                    logisticsLoading: false
+                });
             });
     },
 
-    toggleLogisticsExpand() {
-        this.setData({ logisticsExpanded: !this.data.logisticsExpanded });
+    toggleLogisticsExpand(e) {
+        const index = Number(e.currentTarget.dataset.index);
+        if (Number.isNaN(index)) return;
+        const key = `logisticsExpandedMap.${index}`;
+        this.setData({ [key]: !this.data.logisticsExpandedMap[index] });
     },
 
     computeEnableLogisticsTrace(type, detail) {
         if (!detail) return false;
         if (type === 'form') {
             const dj = detail.dataJson || {};
-            const companyHint = (dj.logisticsCompany || dj.expressCompany || '').trim();
-            const senderOk = (dj.senderName || '').trim() && (dj.senderPhone || '').trim();
-            return !!(companyHint && senderOk);
+            const nos = formatExpressNosDisplay({ expressNos: dj.expressNos });
+            return !!(nos || '').trim();
         }
         if (type === 'sell') {
-            const companyHint = (detail.logisticsCompany || '').trim();
-            const senderOk = (detail.senderName || '').trim() && (detail.senderPhone || '').trim();
-            return !!(companyHint && senderOk);
+            const nos = formatExpressNosDisplay({ logisticsNos: detail.logisticsNos });
+            return !!(nos || '').trim();
         }
         return false;
     },
@@ -107,13 +136,13 @@ Page({
     setFormData(r) {
         const status = r.status != null ? (typeof r.status === 'object' ? r.status.code : r.status) : null;
         const dataJson = r.dataJson || {};
+        const expressNoDisplay = formatExpressNosDisplay({ expressNos: dataJson.expressNos });
         const proofUrls = [];
         if (r.settledProofUrl) proofUrls.push(r.settledProofUrl);
         if (r.settledProofUrls && r.settledProofUrls.length) proofUrls.push(...r.settledProofUrls);
         const dataJsonLabels = [];
-        const keys = ['expressNo', 'senderName', 'senderPhone', 'logisticsCompany', 'giftDesc', 'orderNoMain', 'orderNoGift', 'signDate', 'remark'];
+        const keys = ['senderName', 'senderPhone', 'logisticsCompany', 'giftDesc', 'orderNoMain', 'orderNoGift', 'signDate', 'remark'];
         const keyNames = {
-            expressNo: '快递单号',
             senderName: '收件人姓名',
             senderPhone: '收件人手机',
             logisticsCompany: '物流公司',
@@ -140,7 +169,8 @@ Page({
             createdAt: formatDateTime(r.createdAt),
             updatedAt: formatDateTime(r.updatedAt),
             proofUrls,
-            dataJsonLabels
+            dataJsonLabels,
+            expressNoDisplay
         });
     },
 
@@ -150,6 +180,7 @@ Page({
             name: i.productName || i.name || '—',
             quantity: i.quantity != null ? i.quantity : 1
         }));
+        const logisticsNoDisplay = formatExpressNosDisplay({ logisticsNos: r.logisticsNos });
         this.setData({
             loading: false,
             sell: r,
@@ -158,7 +189,8 @@ Page({
             updatedAt: formatDateTime(r.updatedAt),
             proofUrls,
             depositText: r.storage === 1 ? '寄存' : (r.storage === 0 ? '不寄存' : '—'),
-            items
+            items,
+            logisticsNoDisplay
         });
     }
 });

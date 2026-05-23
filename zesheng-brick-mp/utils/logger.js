@@ -21,6 +21,28 @@ const logger = {
       console.warn('[WARN]', ...args);
     }
   },
+
+  /**
+   * 统一错误提示
+   * @param {string} msg - 错误消息
+   * @param {'toast'|'modal'|'none'} type - 提示方式
+   */
+  showError(msg, type = 'toast') {
+    if (type === 'none') return;
+    if (type === 'modal') {
+      wx.showModal({
+        title: '提示',
+        content: msg,
+        showCancel: false,
+      });
+      return;
+    }
+    wx.showToast({
+      title: msg,
+      icon: 'none',
+      duration: 2000,
+    });
+  },
 };
 
 module.exports = logger;

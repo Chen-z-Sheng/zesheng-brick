@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -64,7 +65,7 @@ public class SellOrderSubmissionController {
 
     @GetMapping("/{id}/logistics-trace")
     @Operation(summary = "我的行情报单物流轨迹（快递100）")
-    public R<LogisticsTraceVo> logisticsTrace(@PathVariable Long id, HttpServletRequest request) {
+    public R<List<LogisticsTraceVo>> logisticsTrace(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getUserId(request);
         return R.success(logisticsTraceService.traceSellOrderForUser(userId, id));
     }

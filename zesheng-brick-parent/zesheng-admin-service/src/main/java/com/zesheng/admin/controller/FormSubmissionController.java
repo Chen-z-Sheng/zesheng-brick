@@ -18,6 +18,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 /**
  * 管理端-固结报单提交记录
  */
@@ -55,7 +57,7 @@ public class FormSubmissionController {
     @GetMapping("/{id}/logistics-trace")
     @Operation(summary = "物流轨迹（快递100）")
     @PreAuthorize("hasAuthority('admin:form-submission:list')")
-    public R<LogisticsTraceVo> logisticsTrace(@PathVariable Long id) {
+    public R<List<LogisticsTraceVo>> logisticsTrace(@PathVariable Long id) {
         return R.success(adminLogisticsTraceService.traceFormSubmission(id));
     }
 
