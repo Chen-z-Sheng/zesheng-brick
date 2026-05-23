@@ -9,6 +9,9 @@ on:
             - 'zesheng-brick-admin-web/**'
             - '.github/workflows/deploy-admin-web.yml'
 
+permissions:
+    contents: write
+
 jobs:
     deploy:
         name: Deploy to GitHub Pages
@@ -41,6 +44,6 @@ jobs:
             - name: Deploy to GitHub Pages
               uses: peaceiris/actions-gh-pages@v4
               with:
-                  github_token: ${{ secrets.GH_PAGES_TOKEN }}
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
                   publish_dir: ./zesheng-brick-admin-web/dist
                   publish_branch: gh-pages
